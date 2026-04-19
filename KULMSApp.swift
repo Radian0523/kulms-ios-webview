@@ -34,7 +34,7 @@ struct KULMSApp: App {
             ContentView()
                 .environmentObject(appState)
                 .task {
-                    await NotificationService.shared.requestPermission()
+                    _ = await NotificationService.shared.requestPermission()
                 }
                 .onAppear {
                     // セッション切れ検知
