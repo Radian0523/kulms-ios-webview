@@ -1,0 +1,93 @@
+/* Section labels */
+"sectionOverdue" = "Overdue";
+"sectionDanger" = "Within 24 hours";
+"sectionWarning" = "Within 5 days";
+"sectionSuccess" = "Within 14 days";
+"sectionOther" = "Other";
+"sectionCompleted" = "Completed";
+
+/* Assignment status */
+"statusSubmitted" = "Submitted";
+"statusGraded" = "Graded";
+"badgeQuiz" = "Quiz";
+"badgeResubmit" = "Resubmittable";
+"badgeNoResubmit" = "No resubmission";
+
+/* Remaining time */
+"expired" = "Expired";
+"resubmitPeriod" = "Resubmission period";
+"remainDaysHoursMins" = "%dd %dh %dm left";
+"remainHoursMins" = "%dh %dm left";
+"remainMins" = "%dm left";
+
+/* Assignment list */
+"assignmentList" = "Assignments";
+"noAssignments" = "No assignments found";
+"refetch" = "Refetch";
+"retry" = "Retry";
+"loadingCourses" = "Loading courses...";
+"loadingAssignments" = "Loading assignments... (%d/%d)";
+"lastUpdatedNow" = "Last updated: just now";
+"lastUpdatedMins" = "Last updated: %dm ago";
+
+/* Settings */
+"settings" = "Settings";
+"close" = "Close";
+"sectionAssignmentUpdate" = "Assignments";
+"autoCompleteLabel" = "Auto-detect submission status";
+"autoCompleteDesc" = "Turn OFF to use manual check only\n* Quizzes require manual check";
+"sectionNotifications" = "Notifications";
+"deadlineRemind" = "Deadline reminders";
+"notificationTiming" = "Notification timing";
+"addTiming" = "Add notification timing";
+"add" = "Add";
+"cancel" = "Cancel";
+"sectionInfo" = "Info";
+"lastUpdated" = "Last updated";
+"assignmentCount" = "Assignments";
+"sendFeedback" = "Send feedback";
+"homepage" = "Homepage";
+"logout" = "Log out";
+"logoutConfirm" = "Log out?";
+"logoutConfirmBody" = "Session and cache will be deleted";
+
+/* Notification offset presets */
+"offset10m" = "10 min before";
+"offset30m" = "30 min before";
+"offset1h" = "1 hour before";
+"offset3h" = "3 hours before";
+"offset5h" = "5 hours before";
+"offset12h" = "12 hours before";
+"offset24h" = "24 hours before";
+"offset2d" = "2 days before";
+"offset3d" = "3 days before";
+
+/* Notification offset labels (dynamic) */
+"offsetDaysBefore" = "%d days before";
+"offsetHoursBefore" = "%d hours before";
+"offsetMinsBefore" = "%d min before";
+"offsetDays" = "%d days";
+"offsetHours" = "%d hours";
+"offsetMins" = "%d min";
+
+/* Notification content */
+"notifTitleSoon" = "Assignment deadline approaching";
+"notifTitleApproaching" = "Assignment deadline is near";
+"notifBody" = "\"%@\" (%@) — %@ until deadline";
+
+/* Login */
+"loginSubtitle" = "Kyoto University Learning Management System";
+"labelUsername" = "ECS-ID / SPS-ID";
+"labelPassword" = "Password";
+"savePassword" = "Save password on this device (encrypted)";
+"loggingIn" = "Logging in...";
+"login" = "Log in";
+"loginBrowser" = "Log in with web browser";
+"loginBrowserDesc" = "(For passkey / multi-factor authentication)";
+"verifying" = "Verifying...";
+"loginDone" = "Login complete → Assignment list";
+"tapAfterAuth" = "Tap after completing authentication";
+"backToCredentials" = "Back to ID/password input";
+"sessionNotConfirmed" = "Session could not be confirmed. Please log in and try again.";
+"verificationFailed" = "Verification failed: %@";
+"loginTimeout" = "Login timed out. Please check your network connection.";
