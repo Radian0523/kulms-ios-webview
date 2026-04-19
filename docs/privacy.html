@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>プライバシーポリシー — KULMS+ for iOS</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4ed;
+  --bg-card:#faf9f5;
+  --fg:#141413;
+  --fg2:#5e5d59;
+  --fg3:#87867f;
+  --accent:#c96442;
+  --accent-hover:#b85838;
+  --border:#f0eee6;
+  --border-strong:#e8e6dc;
+  --shadow:rgba(0,0,0,0.05);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#141413;
+    --bg-card:#30302e;
+    --fg:#faf9f5;
+    --fg2:#b0aea5;
+    --fg3:#87867f;
+    --accent:#d97757;
+    --accent-hover:#e08a6c;
+    --border:#30302e;
+    --border-strong:#3d3d3a;
+    --shadow:rgba(0,0,0,0.15);
+  }
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif;
+  background:var(--bg);color:var(--fg);
+  line-height:1.6;-webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.header{text-align:center;padding:5rem 1.5rem 2rem}
+.header h1{
+  font-family:Georgia,"Times New Roman","Hiragino Mincho ProN",serif;
+  font-size:2.25rem;font-weight:500;
+  margin:1rem 0 0.25rem;line-height:1.1;
+  color:var(--fg);
+}
+.header p{font-size:1rem;color:var(--fg3)}
+.content{
+  max-width:680px;margin:0 auto;padding:0 1.5rem 3rem;
+}
+.content h2{
+  font-family:Georgia,"Times New Roman","Hiragino Mincho ProN",serif;
+  font-size:1.4rem;font-weight:500;
+  margin:2rem 0 0.75rem;color:var(--fg);
+}
+.content p,.content ul{
+  font-size:0.9375rem;color:var(--fg2);
+  margin-bottom:0.75rem;
+}
+.content ul{padding-left:1.5rem}
+.content li{margin-bottom:0.35rem}
+.footer{
+  text-align:center;padding:2rem 1.5rem;
+  color:var(--fg3);font-size:0.85rem;
+  border-top:1px solid var(--border);
+  max-width:680px;margin:0 auto;
+}
+.footer a{color:var(--fg3)}
+.footer a:hover{color:var(--accent)}
+@media(max-width:640px){
+  .header{padding:3rem 1.5rem 1.5rem}
+  .header h1{font-size:1.75rem}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>プライバシーポリシー</h1>
+  <p>KULMS+ for iOS — 京都大学LMS拡張アプリ</p>
+</header>
+
+<main class="content">
+  <p>最終更新日: 2026年4月19日</p>
+
+  <h2>はじめに</h2>
+  <p>KULMS+ for iOS（以下「本アプリ」）は、京都大学LMS（KULMS / Sakai）をWKWebViewで表示し、Chrome拡張機能「KULMS+」の機能を提供するiOSアプリです。本アプリはユーザーのプライバシーを尊重し、個人情報の収集・外部送信を一切行いません。</p>
+
+  <h2>データの収集について</h2>
+  <p>本アプリは、開発者が運営するサーバーへのデータ送信を行いません。以下のデータはすべてお使いの端末内にのみ保存され、端末の外に出ることはありません。</p>
+  <ul>
+    <li>課題・クイズの一覧データ（拡張機能スクリプトが取得したキャッシュ、UserDefaultsに保存）</li>
+    <li>課題の完了チェック状態</li>
+    <li>通知タイミングの設定</li>
+    <li>各種拡張機能の設定</li>
+  </ul>
+
+  <h2>外部との通信</h2>
+  <p>本アプリは、以下のドメインとのみ通信を行います。</p>
+  <ul>
+    <li><strong>lms.gakusei.kyoto-u.ac.jp</strong> — 京都大学LMS（SSOログイン、LMSページの表示）</li>
+  </ul>
+  <p>これらの通信はすべてアプリ内のWKWebViewから直接行われ、第三者のサーバーを経由しません。アナリティクス、トラッキング、広告関連の通信は一切ありません。</p>
+
+  <h2>認証情報</h2>
+  <p>SSOログインはアプリ内のWKWebViewで行われます。認証情報（ユーザー名・パスワード）は京都大学の認証サーバーに直接送信されます。パスワード保存機能を有効にした場合、パスワードはiOS Keychainで安全に保存されます。</p>
+
+  <h2>通知</h2>
+  <p>本アプリは、課題の締切前にローカル通知を送信します。通知はすべて端末内でスケジュールされ、外部のプッシュ通知サーバーは使用しません。</p>
+
+  <h2>第三者への提供</h2>
+  <p>本アプリが取得・保存するデータを、第三者に提供・販売・共有することはありません。</p>
+
+  <h2>データの削除</h2>
+  <p>本アプリをアンインストールすると、端末に保存されたすべてのデータ（キャッシュ、設定、Cookie）が自動的に削除されます。</p>
+
+  <h2>お問い合わせ</h2>
+  <p>本ポリシーに関するご質問は、<a href="https://github.com/Radian0523/kulms-ios-webview/issues" target="_blank" rel="noopener">GitHub Issues</a> までお願いします。</p>
+</main>
+
+<footer class="footer">
+  <a href="https://github.com/Radian0523/kulms-ios-webview">KULMS+ for iOS — GitHub</a>
+</footer>
+
+</body>
+</html>
