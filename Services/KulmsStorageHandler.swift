@@ -63,6 +63,20 @@ final class KulmsStorageHandler: NSObject, WKScriptMessageHandler {
         }
         saveStore(store)
         sendCallback(callbackId: callbackId, data: [:])
+
+        // 課題データ更新時に通知をスケジュール
+        if items["kulms-assignments"] != nil || items["kulms-checked-assignments"] != nil {
+            if let data = store["kulms-assignments"] as? [String: Any],
+               let assignments = data["assignments"] as? [[String: Any]] {
+                let checked = store["kulms-checked-assignments"] as? [String: Any] ?? [:]
+                Task {
+                    await NotificationService.shared.scheduleFromExtensionData(
+                        assignments: assignments,
+                        checkedState: checked
+                    )
+                }
+            }
+        }
     }
 
     private func handleRemove(keys: [String], callbackId: String) {

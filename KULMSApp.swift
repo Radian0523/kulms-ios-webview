@@ -33,6 +33,9 @@ struct KULMSApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
+                .task {
+                    await NotificationService.shared.requestPermission()
+                }
                 .onAppear {
                     // セッション切れ検知
                     WebViewManager.shared.onSessionExpired = { [weak appState] in
