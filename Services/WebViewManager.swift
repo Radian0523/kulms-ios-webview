@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import WebKit
 
 /// ログイン結果。
@@ -303,9 +304,14 @@ extension WebViewManager: WKNavigationDelegate {
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
-        // 非 LMS ドメインへのスクリプト注入は WKUserScript の
-        // injectionTime + all_frames で自動制御されるが、
-        // ここでは全ナビゲーションを許可する（SSO フロー対応）。
+        // target="_blank" のリンクは Safari で開く
+        if navigationAction.targetFrame == nil,
+           let url = navigationAction.request.url {
+            UIApplication.shared.open(url)
+            decisionHandler(.cancel)
+            return
+        }
+        // それ以外は全ナビゲーションを許可（SSO フロー対応）
         decisionHandler(.allow)
     }
 }
