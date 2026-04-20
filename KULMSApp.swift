@@ -7,6 +7,7 @@ import WebKit
 /// SwiftData は不要。ログイン状態のみ管理。
 class AppState: ObservableObject {
     @Published var isLoggedIn = false
+    @Published var isDemoMode = false
 
     func logout() {
         // Clear cookies
@@ -55,7 +56,9 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if appState.isLoggedIn {
+            if appState.isDemoMode {
+                DemoWebView()
+            } else if appState.isLoggedIn {
                 LMSWebView()
             } else {
                 LoginView()

@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KULMS+ Demo</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --header-bg: #333435;
+  --primary: #0f4b70;
+  --favbar-bg: #f3f4f4;
+  --sidebar-bg: #e3e4e5;
+  --border: #e3e4e5;
+  --body-bg: #fff;
+  --text: #333;
+  --text2: #777;
+  --panel-bg: #e8e8e8;
+  --panel-tab: #6483d3;
+  --danger: #e85555;
+  --warning: #d7aa57;
+  --success: #62b665;
+  --other: #777;
+  --checked: #6582ff;
+  --memo-color: #26a69a;
+  --toggle-on: #4a6fa5;
+  --amazon: #ff9900;
+  --link: #1565c0;
+  --syl-bg: #e8eef7;
+  --syl-color: #4a6fa5;
+  --card-bg: #fff;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --header-bg: #1a1a1b;
+    --favbar-bg: #2a2a2a;
+    --sidebar-bg: #232323;
+    --border: #3a3a3a;
+    --body-bg: #1e1e1e;
+    --text: #e0e0e0;
+    --text2: #999;
+    --panel-bg: #2a2a2a;
+    --link: #8ab4f8;
+    --syl-bg: #2a3548;
+    --syl-color: #8ab4f8;
+    --card-bg: #333;
+  }
+}
+
+html { font-size: 14px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+  background: var(--body-bg);
+  color: var(--text);
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ===== Demo Banner ===== */
+.demo-banner {
+  background: #fff3cd; color: #856404;
+  text-align: center; padding: 5px 16px;
+  font-size: 11px; font-weight: 600;
+  position: sticky; top: 0; z-index: 300;
+}
+@media (prefers-color-scheme: dark) {
+  .demo-banner { background: #3e2f00; color: #ffd54f; }
+}
+
+/* ===== LMS Header ===== */
+.lms-header {
+  background: var(--header-bg); color: #fff;
+  padding: 8px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 21px; z-index: 250;
+}
+.lms-logo { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; }
+.lms-logo .ku-mark {
+  width: 22px; height: 22px; background: var(--primary); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 9px;
+}
+.lms-breadcrumb { font-size: 12px; opacity: 0.7; margin-left: 8px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.header-icon { font-size: 16px; opacity: 0.7; cursor: pointer; }
+.header-icon:hover { opacity: 1; }
+.kulms-toggle-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.3);
+  color: #fff; font-size: 10px; font-weight: 700;
+  padding: 3px 8px; border-radius: 4px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.kulms-toggle-btn:hover { border-color: rgba(255,255,255,0.6); }
+
+/* ===== Top Favbar ===== */
+.top-favbar {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  padding: 5px 10px; background: var(--favbar-bg);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.fav-item {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px; font-size: 11px;
+  border-left: 3px solid var(--other); border-radius: 4px;
+  background: rgba(0,0,0,0.04); white-space: nowrap;
+  color: var(--text); cursor: pointer; position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+.fav-item::after { content: '\25BE'; margin-left: 3px; font-size: 9px; opacity: 0.4; }
+.fav-item.open { background: rgba(0,0,0,0.1); }
+.fav-item.open::after { transform: rotate(180deg); }
+.now-badge, .next-badge {
+  display: inline-block; padding: 0 4px; border-radius: 6px;
+  font-size: 8px; font-weight: 700; color: #fff; margin-left: 3px; vertical-align: middle;
+}
+.now-badge { background: #e53935; animation: pulse 2s infinite; }
+.next-badge { background: #1976d2; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+/* Dropdown */
+.fav-dropdown {
+  display: none; position: absolute; top: 100%; left: 0; z-index: 500;
+  background: var(--card-bg); border: 1px solid #d0d7de; border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15); padding: 4px 0;
+  min-width: 180px; margin-top: 4px;
+}
+.fav-dropdown.open { display: block; }
+.fav-dropdown-item {
+  display: block; padding: 7px 12px; font-size: 12px;
+  color: var(--text); text-decoration: none; border-radius: 4px; margin: 0 4px;
+}
+.fav-dropdown-item:active { background: #e8f0fe; }
+
+/* ===== Main Page ===== */
+.lms-page { padding: 12px; }
+.lms-section-title {
+  font-size: 12px; font-weight: 600; color: var(--text2);
+  padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+}
+.lms-card {
+  background: var(--favbar-bg); border-radius: 6px;
+  padding: 10px 12px; margin-bottom: 8px; font-size: 12px; line-height: 1.5;
+}
+.lms-card-title { font-weight: 600; margin-bottom: 2px; }
+.lms-card-meta { font-size: 10px; color: var(--text2); margin-top: 3px; }
+
+/* Sidebar (collapsible on mobile) */
+.lms-sidebar { display: none; }
+.lms-sidebar.open {
+  display: block; background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--border); padding: 6px 0;
+}
+.sidebar-toggle-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px; background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; color: var(--text2); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sidebar-toggle-btn .arrow { font-size: 9px; transition: transform 0.2s; }
+.sidebar-toggle-btn .arrow.open { transform: rotate(90deg); }
+.sb-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px; font-size: 12px; color: var(--text);
+}
+.sb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sb-pin { margin-left: auto; font-size: 10px; color: var(--text2); }
+
+/* ===== KULMS+ Panel (slide-in overlay) ===== */
+.panel-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3); z-index: 400;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.panel-overlay.open { opacity: 1; pointer-events: auto; }
+
+.kulms-panel {
+  position: fixed; right: -310px; top: 0; bottom: 0;
+  width: 300px; max-width: 85vw;
+  background: var(--panel-bg); z-index: 450;
+  display: flex; flex-direction: column;
+  transition: right 0.35s ease;
+  box-shadow: -2px 0 12px rgba(0,0,0,0.15);
+}
+.kulms-panel.open { right: 0; }
+
+/* Panel Header */
+.p-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px; flex-shrink: 0;
+}
+.p-logo { font-size: 14px; font-weight: 700; color: #464646; }
+.p-version { font-size: 11px; color: #888; margin-left: 6px; }
+@media (prefers-color-scheme: dark) { .p-logo { color: #ddd; } }
+.p-btns { display: flex; gap: 4px; }
+.p-btn {
+  width: 30px; height: 24px; border: none; background: transparent;
+  border-radius: 6px; color: #666; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.p-btn:active { background: rgba(0,0,0,0.1); }
+
+/* Panel Tabs */
+.p-tabs { display: flex; padding: 0 8px; flex-shrink: 0; }
+.p-tab {
+  flex: 1; text-align: center; padding: 8px 0;
+  font-size: 13px; font-weight: 600; color: #666;
+  border-radius: 6px 6px 0 0; cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (prefers-color-scheme: dark) { .p-tab { color: #999; } }
+.p-tab.active { background: var(--panel-tab); color: #fff; }
+
+/* Panel Content */
+.p-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.p-cache { padding: 4px 12px; font-size: 11px; color: #777; }
+.p-tc { display: none; }
+.p-tc.active { display: block; }
+
+/* ===== Assignment Section ===== */
+.a-sec { margin: 0 8px 4px; }
+.a-sec-hd {
+  display: flex; align-items: center; font-size: 13px; font-weight: 600;
+  padding: 6px 8px; border-radius: 5px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+.a-sec-hd .arr {
+  font-size: 10px; margin-right: 6px; transition: transform 0.2s;
+  display: inline-block;
+}
+.a-sec-hd .arr.shut { transform: rotate(-90deg); }
+.a-sec-hd .cnt { margin-left: 4px; font-weight: 400; }
+
+.sec-danger  { border-left:6px solid var(--danger);  background:#f1cdcd; color:#8b2020; }
+.sec-warning { border-left:6px solid var(--warning); background:#e2d4bf; color:#6b4f1a; }
+.sec-success { border-left:6px solid var(--success); background:#cce6cf; color:#1e5e20; }
+.sec-other   { border-left:6px solid var(--other);   background:#e0e0e0; color:#444; }
+.sec-checked { border-left:6px solid var(--checked); background:#c6d1fc; color:#2a3d8f; }
+.sec-memo    { border-left:6px solid var(--memo-color); background:#c8ece9; color:#1a5d56; }
+@media (prefers-color-scheme: dark) {
+  .sec-danger  { background:#3d1c1c; color:#f1a0a0; }
+  .sec-warning { background:#3d3018; color:#d7c090; }
+  .sec-success { background:#1c3d1e; color:#a0d4a3; }
+  .sec-other   { background:#333; color:#bbb; }
+  .sec-checked { background:#1c2050; color:#a0b0f0; }
+  .sec-memo    { background:#1a3330; color:#90d0c8; }
+}
+
+/* Cards container */
+.a-cards { padding: 4px 8px; overflow: hidden; transition: max-height 0.3s ease; }
+.a-cards.shut { max-height: 0 !important; padding: 0 8px; }
+
+/* Card */
+.a-card {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: var(--card-bg); border: 2px solid var(--other);
+  border-radius: 10px; padding: 8px; margin-bottom: 6px; position: relative;
+}
+.a-card.ud { border-color: var(--danger); }
+.a-card.uw { border-color: var(--warning); }
+.a-card.us { border-color: var(--success); }
+.a-card.uc { border-color: var(--checked); opacity: 0.7; }
+
+/* Checkbox */
+.a-cb {
+  width: 16px; height: 16px; border: 2px solid #aaa;
+  border-radius: 50%; flex-shrink: 0; margin-top: 2px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: all 0.15s;
+}
+.a-cb:active { border-color: #0064cd; }
+.a-cb.on { background: #0064cd; border-color: #0064cd; }
+
+.a-body { flex: 1; min-width: 0; }
+.a-pill {
+  display: inline-block; padding: 1px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 600; color: #fff; margin-bottom: 3px;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.a-badge {
+  display: inline-block; padding: 1px 7px; border-radius: 10px;
+  font-size: 10px; font-weight: 600; margin-left: 4px; vertical-align: middle;
+}
+.bg-notsub { background: #ffebee; color: #c62828; }
+.bg-sub { background: #e8f5e9; color: #2e7d32; }
+.bg-graded { background: #e3f2fd; color: #1565c0; }
+@media (prefers-color-scheme: dark) {
+  .bg-notsub { background:#3d1c1c; color:#ef9a9a; }
+  .bg-sub { background:#1c3d1e; color:#a5d6a7; }
+  .bg-graded { background:#1c2040; color:#90b0f0; }
+}
+.a-name { font-size: 12px; font-weight: 600; margin-bottom: 2px; color: var(--link); }
+.a-meta { display: flex; gap: 6px; font-size: 11px; color: #777; flex-wrap: wrap; }
+.a-time { font-weight: 700; font-size: 11px; color: var(--text); }
+.a-time.dng { color: var(--danger); }
+
+/* Memo */
+.memo-fab {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--memo-color); color: #fff; border: none;
+  font-size: 22px; display: flex; align-items: center; justify-content: center;
+  margin: 8px auto; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s;
+}
+.memo-fab:active { transform: scale(0.9); }
+.memo-fab.rotated { transform: rotate(45deg); }
+.memo-form {
+  display: none; background: var(--card-bg); border-radius: 8px;
+  padding: 8px; margin: 0 8px 8px;
+}
+.memo-form.open { display: block; }
+.memo-input {
+  width: 100%; border: 1px solid #ccc; border-radius: 6px;
+  padding: 6px 8px; font-size: 12px; resize: vertical; min-height: 60px;
+  font-family: inherit; background: var(--body-bg); color: var(--text);
+}
+.memo-btns { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
+.memo-btns button {
+  padding: 4px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;
+  border: none; -webkit-tap-highlight-color: transparent;
+}
+.memo-cancel { background: #e0e0e0; color: #333; }
+.memo-save { background: var(--memo-color); color: #fff; }
+
+/* Memo Card */
+.a-card.memo-card { border-color: var(--memo-color); flex-direction: column; gap: 4px; }
+.memo-text { font-size: 12px; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+.memo-del {
+  position: absolute; top: 4px; right: 6px; font-size: 16px;
+  color: #999; cursor: pointer; background: none; border: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.memo-del:active { color: var(--danger); }
+
+/* ===== Textbook ===== */
+.tb-note { padding: 8px 12px; font-size: 11px; color: #999; }
+.tb-ch {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: #444;
+  padding: 8px; margin: 0 8px; background: #f5f5f5;
+  border-radius: 6px; cursor: pointer; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (prefers-color-scheme: dark) { .tb-ch { background: #333; color: #ddd; } }
+.tb-ch .arr { font-size: 10px; transition: transform 0.2s; display: inline-block; }
+.tb-ch .arr.shut { transform: rotate(-90deg); }
+.tb-cnt { font-weight: 400; color: #999; font-size: 12px; }
+.tb-syl {
+  font-size: 10px; font-weight: 600; color: var(--syl-color);
+  background: var(--syl-bg); padding: 2px 8px; border-radius: 4px; margin-left: auto;
+}
+.tb-items { overflow: hidden; transition: max-height 0.3s; }
+.tb-items.shut { max-height: 0 !important; padding: 0; }
+.tb-label { font-size: 11px; font-weight: 600; color: #888; padding: 6px 20px 2px; }
+.tb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px 8px 20px; border-bottom: 1px solid #f0f0f0; margin: 0 8px;
+}
+@media (prefers-color-scheme: dark) { .tb-item { border-bottom-color: #3a3a3a; } }
+.tb-title { flex: 1; min-width: 0; }
+.tb-tt { font-size: 12px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tb-tm { font-size: 10px; color: #999; }
+.tb-amz {
+  font-size: 10px; font-weight: 600; color: #fff; background: var(--amazon);
+  padding: 3px 8px; border-radius: 4px; flex-shrink: 0; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tb-amz:active { opacity: 0.7; }
+
+/* ===== Settings ===== */
+.st-card { background: #f8f9fb; border-radius: 8px; margin: 6px 8px; overflow: hidden; }
+@media (prefers-color-scheme: dark) { .st-card { background: #2a2a2a; } }
+.st-sec-hd {
+  font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase;
+  padding: 12px 12px 4px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.st-sec-hd .arr { font-size: 10px; transition: transform 0.2s; display: inline-block; }
+.st-sec-hd .arr.shut { transform: rotate(-90deg); }
+.st-rows { overflow: hidden; transition: max-height 0.3s; }
+.st-rows.shut { max-height: 0 !important; }
+.st-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-bottom: 1px solid #f0f0f0;
+}
+@media (prefers-color-scheme: dark) { .st-row { border-bottom-color: #3a3a3a; } }
+.st-row:last-child { border-bottom: none; }
+.st-info { flex: 1; min-width: 0; }
+.st-lbl { font-size: 13px; font-weight: 600; color: var(--text); }
+.st-desc { font-size: 10px; color: #999; margin-top: 1px; }
+.st-ii { font-size: 11px; color: #bbb; margin-left: 3px; }
+
+/* Toggle */
+.tgl {
+  width: 40px; height: 22px; border-radius: 11px;
+  background: #ccc; position: relative; cursor: pointer;
+  transition: background 0.2s; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.tgl.on { background: var(--toggle-on); }
+.tgl::after {
+  content: ''; width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; position: absolute; top: 2px; left: 2px;
+  transition: transform 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.tgl.on::after { transform: translateX(18px); }
+
+.st-lang {
+  font-size: 11px; color: #666; background: #f0f0f0;
+  padding: 3px 8px; border-radius: 4px;
+}
+@media (prefers-color-scheme: dark) { .st-lang { background: #444; color: #ccc; } }
+
+/* Footer */
+.lms-footer {
+  padding: 16px; font-size: 10px; color: #999;
+  text-align: center; border-top: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<div class="demo-banner">Demo Mode</div>
+
+<!-- LMS Header -->
+<div class="lms-header">
+  <div style="display:flex;align-items:center">
+    <div class="lms-logo">
+      <span>KU</span><span class="ku-mark">&#127979;</span><span>LMS</span>
+    </div>
+    <span class="lms-breadcrumb">&gt; Home</span>
+  </div>
+  <div class="header-right">
+    <span class="header-icon">&#x1F514;</span>
+    <span class="header-icon">&#x1F50D;</span>
+    <button class="kulms-toggle-btn" onclick="togglePanel()">KULMS+</button>
+  </div>
+</div>
+
+<!-- Top Favbar -->
+<div class="top-favbar" id="favbar">
+  <span class="fav-item" style="border-left-color:#e85555" onclick="toggleDrop(this)">[Mon1]PowerElec.<span class="now-badge">NOW</span></span>
+  <span class="fav-item" style="border-left-color:#d7aa57" onclick="toggleDrop(this)">[Mon2]Electromag.2<span class="next-badge">NEXT</span></span>
+  <span class="fav-item" style="border-left-color:#62b665" onclick="toggleDrop(this)">[Mon3]AppliedPower</span>
+  <span class="fav-item" style="border-left-color:#8e24aa" onclick="toggleDrop(this)">[Mon4]ElecMachinery</span>
+  <span class="fav-item" style="border-left-color:#1976d2" onclick="toggleDrop(this)">[Tue2]Algo&amp;DS</span>
+  <span class="fav-item" style="border-left-color:#e85555" onclick="toggleDrop(this)">[Tue3]EM Circuits</span>
+  <span class="fav-item" style="border-left-color:#26a69a" onclick="toggleDrop(this)">[Wed1]Comm.Theory</span>
+  <span class="fav-item" style="border-left-color:#ff7043" onclick="toggleDrop(this)">[Wed2]SolidState</span>
+</div>
+
+<!-- Sidebar Toggle -->
+<div class="sidebar-toggle-btn" onclick="toggleSidebar()">
+  <span class="arrow" id="sbArrow">&#9654;</span>
+  <span>Pinned Courses (8)</span>
+</div>
+<div class="lms-sidebar" id="lmsSidebar">
+  <div class="sb-item"><span class="sb-dot" style="background:#e85555"></span>[Mon1] Power Electronics<span class="sb-pin">&#x1F4CC;</span></div>
+  <div class="sb-item"><span class="sb-dot" style="background:#d7aa57"></span>[Mon2] Electromagnetics 2<span class="sb-pin">&#x1F4CC;</span></div>
+  <div class="sb-item"><span class="sb-dot" style="background:#62b665"></span>[Mon3] Applied Power Eng.<span class="sb-pin">&#x1F4CC;</span></div>
+  <div class="sb-item"><span class="sb-dot" style="background:#8e24aa"></span>[Mon4] Electric Machinery<span class="sb-pin">&#x1F4CC;</span></div>
+  <div class="sb-item"><span class="sb-dot" style="background:#1976d2"></span>[Tue2] Algorithms &amp; DS<span class="sb-pin">&#x1F4CC;</span></div>
+  <div class="sb-item"><span class="sb-dot" style="background:#e85555"></span>[Tue3] EM Circuits<span class="sb-pin">&#x1F4CC;</span></div>
+  <div class="sb-item"><span class="sb-dot" style="background:#26a69a"></span>[Wed1] Communication Theory<span class="sb-pin">&#x1F4CC;</span></div>
+  <div class="sb-item"><span class="sb-dot" style="background:#ff7043"></span>[Wed2] Solid State Elec.<span class="sb-pin">&#x1F4CC;</span></div>
+</div>
+
+<!-- Main Content -->
+<div class="lms-page">
+  <div class="lms-section-title">Today's Messages</div>
+  <div class="lms-card">
+    <div class="lms-card-title">MATLAB Workshop (Online, 4/28)</div>
+    <div>Intro to MATLAB: data import, visualization, basic analysis.</div>
+    <div class="lms-card-meta">Apr 15, 2026</div>
+  </div>
+  <div class="lms-card">
+    <div class="lms-card-title">Turnitin Feedback Studio Workshop (4/27)</div>
+    <div>Plagiarism checking tool usage on KULMS.</div>
+    <div class="lms-card-meta">Apr 14, 2026</div>
+  </div>
+  <div class="lms-section-title" style="margin-top:12px">Recent Announcements</div>
+  <div class="lms-card">
+    <div class="lms-card-title">[Mon3] Applied Power Engineering</div>
+    <div>Report #1 deadline: Apr 20 22:00.</div>
+    <div class="lms-card-meta">Apr 18, 2026</div>
+  </div>
+  <div class="lms-card">
+    <div class="lms-card-title">[Mon1] Power Electronics</div>
+    <div>Week 4 lecture materials uploaded.</div>
+    <div class="lms-card-meta">Apr 16, 2026</div>
+  </div>
+  <div class="lms-card">
+    <div class="lms-card-title">[Tue2] Algorithms &amp; DS</div>
+    <div>Programming Exercise #3 released.</div>
+    <div class="lms-card-meta">Apr 15, 2026</div>
+  </div>
+</div>
+<div class="lms-footer">Copyright 2026 Kyoto University. All Rights Reserved.</div>
+
+<!-- Panel Overlay -->
+<div class="panel-overlay" id="panelOverlay" onclick="togglePanel()"></div>
+
+<!-- KULMS+ Panel -->
+<div class="kulms-panel" id="kulmsPanel">
+  <div class="p-header">
+    <div><span class="p-logo">KULMS+</span><span class="p-version">v2.0.2</span></div>
+    <div class="p-btns">
+      <button class="p-btn" onclick="refreshPanel()">&#x21BB;</button>
+      <button class="p-btn" onclick="togglePanel()">&#x2715;</button>
+    </div>
+  </div>
+  <div class="p-tabs">
+    <div class="p-tab active" onclick="switchTab(0)">Assignments</div>
+    <div class="p-tab" onclick="switchTab(1)">Textbooks</div>
+    <div class="p-tab" onclick="switchTab(2)">Settings</div>
+  </div>
+  <div class="p-content">
+
+    <!-- Assignments -->
+    <div class="p-tc active" id="ptc0">
+      <div class="p-cache">Last updated: just now</div>
+
+      <div class="a-sec">
+        <div class="a-sec-hd sec-danger" onclick="togSec(this)"><span class="arr">&#x25BC;</span>Within 24 hours<span class="cnt">(1)</span></div>
+        <div class="a-cards">
+          <div class="a-card ud">
+            <div class="a-cb" onclick="togCb(this)"></div>
+            <div class="a-body">
+              <div><span class="a-pill" style="background:#62b665">[Mon3] Applied Power</span><span class="a-badge bg-notsub">Not Submitted</span></div>
+              <div class="a-name">Report #1 (4/13)</div>
+              <div class="a-meta"><span>2026/04/20 22:00</span><span class="a-time dng">2h 46m left</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="a-sec">
+        <div class="a-sec-hd sec-warning" onclick="togSec(this)"><span class="arr">&#x25BC;</span>Within 14 days<span class="cnt">(2)</span></div>
+        <div class="a-cards">
+          <div class="a-card uw">
+            <div class="a-cb" onclick="togCb(this)"></div>
+            <div class="a-body">
+              <div><span class="a-pill" style="background:#e85555">[Mon1] Power Elec.</span></div>
+              <div class="a-name">Report Assignment #2</div>
+              <div class="a-meta"><span>2026/05/01 23:59</span><span class="a-time">11d 4h left</span></div>
+            </div>
+          </div>
+          <div class="a-card uw">
+            <div class="a-cb" onclick="togCb(this)"></div>
+            <div class="a-body">
+              <div><span class="a-pill" style="background:#d7aa57">[Mon2] Electromag.2</span></div>
+              <div class="a-name">Problem Set #4</div>
+              <div class="a-meta"><span>2026/05/04 23:59</span><span class="a-time">14d left</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="a-sec">
+        <div class="a-sec-hd sec-success" onclick="togSec(this)"><span class="arr">&#x25BC;</span>30 days+<span class="cnt">(1)</span></div>
+        <div class="a-cards">
+          <div class="a-card us">
+            <div class="a-cb" onclick="togCb(this)"></div>
+            <div class="a-body">
+              <div><span class="a-pill" style="background:#1976d2">[Tue2] Algo&amp;DS</span><span class="a-badge bg-sub">Submitted</span></div>
+              <div class="a-name">Programming Exercise #3</div>
+              <div class="a-meta"><span>2026/05/25 23:59</span><span class="a-time">35d left</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="a-sec">
+        <div class="a-sec-hd sec-checked" onclick="togSec(this)"><span class="arr shut">&#x25BC;</span>Completed<span class="cnt">(3)</span></div>
+        <div class="a-cards shut">
+          <div class="a-card uc">
+            <div class="a-cb on" onclick="togCb(this)"></div>
+            <div class="a-body">
+              <div><span class="a-pill" style="background:#8e24aa">[Mon4] Elec.Machinery</span><span class="a-badge bg-graded">Graded</span></div>
+              <div class="a-name">Midterm Report</div>
+              <div class="a-meta"><span>2026/04/15 23:59</span></div>
+            </div>
+          </div>
+          <div class="a-card uc">
+            <div class="a-cb on" onclick="togCb(this)"></div>
+            <div class="a-body">
+              <div><span class="a-pill" style="background:#62b665">[Mon3] Applied Power</span><span class="a-badge bg-sub">Submitted</span></div>
+              <div class="a-name">Quiz #2</div>
+              <div class="a-meta"><span>2026/04/13 22:00</span></div>
+            </div>
+          </div>
+          <div class="a-card uc">
+            <div class="a-cb on" onclick="togCb(this)"></div>
+            <div class="a-body">
+              <div><span class="a-pill" style="background:#e85555">[Mon1] Power Elec.</span><span class="a-badge bg-graded">Graded</span></div>
+              <div class="a-name">Report Assignment #1</div>
+              <div class="a-meta"><span>2026/04/10 23:59</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Memo section -->
+      <div class="a-sec" id="memoSection">
+        <div class="a-sec-hd sec-memo" onclick="togSec(this)"><span class="arr">&#x25BC;</span>Memo<span class="cnt" id="memoCnt">(0)</span></div>
+        <div class="a-cards" id="memoCards"></div>
+      </div>
+
+      <div class="memo-form" id="memoForm">
+        <textarea class="memo-input" id="memoInput" placeholder="Write a memo..."></textarea>
+        <div class="memo-btns">
+          <button class="memo-cancel" onclick="closeMemo()">Cancel</button>
+          <button class="memo-save" onclick="saveMemo()">Save</button>
+        </div>
+      </div>
+      <button class="memo-fab" id="memoFab" onclick="openMemo()">+</button>
+    </div>
+
+    <!-- Textbooks -->
+    <div class="p-tc" id="ptc1">
+      <div class="tb-note">* Only courses in KULASIS syllabus are supported.</div>
+
+      <div class="tb-ch" onclick="togTb(this)"><span class="arr">&#x25BC;</span>[Mon1] Power Elec.<span class="tb-cnt">(4)</span><span class="tb-syl">Syllabus</span></div>
+      <div class="tb-items">
+        <div class="tb-label">Textbooks</div>
+        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Note-based lectures...</div></div><span class="tb-amz">Amazon</span></div>
+        <div class="tb-label">References</div>
+        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Ace Power Electronics...</div><div class="tb-tm">Hikihara et al. / Asakura, 2000</div></div><span class="tb-amz">Amazon</span></div>
+        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Basic Power Electronics</div><div class="tb-tm">Miyairi / Maruzen, 1989</div></div><span class="tb-amz">Amazon</span></div>
+        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Power Elec. for Engineers</div><div class="tb-tm">Hirota et al. / Morikita, 2013</div></div><span class="tb-amz">Amazon</span></div>
+      </div>
+
+      <div class="tb-ch" onclick="togTb(this)" style="margin-top:4px"><span class="arr">&#x25BC;</span>[Mon2] Electromagnetics 2<span class="tb-cnt">(1)</span><span class="tb-syl">Syllabus</span></div>
+      <div class="tb-items">
+        <div class="tb-label">Textbooks</div>
+        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Electromagnetics (Shimazaki)</div></div><span class="tb-amz">Amazon</span></div>
+      </div>
+
+      <div class="tb-ch" onclick="togTb(this)" style="margin-top:4px"><span class="arr">&#x25BC;</span>[Mon3] Applied Power<span class="tb-cnt">(2)</span><span class="tb-syl">Syllabus</span></div>
+      <div class="tb-items">
+        <div class="tb-label">Textbooks</div>
+        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Electric Power Systems</div><div class="tb-tm">Ohmsha, 2018</div></div><span class="tb-amz">Amazon</span></div>
+        <div class="tb-label">References</div>
+        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Power System Engineering</div><div class="tb-tm">Mohan, Wiley, 2012</div></div><span class="tb-amz">Amazon</span></div>
+      </div>
+
+      <div class="tb-ch" onclick="togTb(this)" style="margin-top:4px"><span class="arr shut">&#x25BC;</span>[Tue2] Algo &amp; DS<span class="tb-cnt">(1)</span><span class="tb-syl">Syllabus</span></div>
+      <div class="tb-items shut">
+        <div class="tb-label">Textbooks</div>
+        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Introduction to Algorithms</div><div class="tb-tm">Cormen et al. / MIT Press</div></div><span class="tb-amz">Amazon</span></div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="p-tc" id="ptc2">
+      <div class="st-card">
+        <div class="st-sec-hd" onclick="togSt(this)"><span class="arr">&#x25BC;</span>Appearance</div>
+        <div class="st-rows">
+          <div class="st-row">
+            <div class="st-info"><div class="st-lbl">Language<span class="st-ii">&#x24D8;</span></div><div class="st-desc">UI display language</div></div>
+            <span class="st-lang">Auto (Browser)</span>
+          </div>
+        </div>
+      </div>
+      <div class="st-card">
+        <div class="st-sec-hd" onclick="togSt(this)"><span class="arr">&#x25BC;</span>Panel</div>
+        <div class="st-rows">
+          <div class="st-row"><div class="st-info"><div class="st-lbl">Textbook Panel<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="st-row"><div class="st-info"><div class="st-lbl">Memo Feature<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="st-row"><div class="st-info"><div class="st-lbl">Push Display<span class="st-ii">&#x24D8;</span></div></div><div class="tgl" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+      </div>
+      <div class="st-card">
+        <div class="st-sec-hd" onclick="togSt(this)"><span class="arr">&#x25BC;</span>Sidebar</div>
+        <div class="st-rows">
+          <div class="st-row"><div class="st-info"><div class="st-lbl">Course Tab Colors<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="st-row"><div class="st-info"><div class="st-lbl">Assignment Badge<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="st-row"><div class="st-info"><div class="st-lbl">Course Name Cleanup<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="st-row"><div class="st-info"><div class="st-lbl">Pin Sort<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="st-row"><div class="st-info"><div class="st-lbl">Course Click Expand<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="st-row"><div class="st-info"><div class="st-lbl">Tool Visibility<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Panel toggle */
+function togglePanel() {
+  document.getElementById('kulmsPanel').classList.toggle('open');
+  document.getElementById('panelOverlay').classList.toggle('open');
+}
+
+/* Refresh animation */
+function refreshPanel() {
+  var btn = event.currentTarget;
+  btn.style.transition = 'transform 0.5s';
+  btn.style.transform = 'rotate(360deg)';
+  setTimeout(function() { btn.style.transition = ''; btn.style.transform = ''; }, 500);
+  var ci = document.querySelector('.p-cache');
+  if (ci) ci.textContent = 'Last updated: just now';
+}
+
+/* Tabs */
+function switchTab(i) {
+  document.querySelectorAll('.p-tab').forEach(function(t,j) { t.classList.toggle('active', j===i); });
+  document.querySelectorAll('.p-tc').forEach(function(c,j) { c.classList.toggle('active', j===i); });
+}
+
+/* Assignment section toggle */
+function togSec(hd) {
+  var arr = hd.querySelector('.arr');
+  var cards = hd.nextElementSibling;
+  if (!cards) return;
+  arr.classList.toggle('shut');
+  cards.classList.toggle('shut');
+}
+
+/* Checkbox */
+function togCb(el) {
+  el.classList.toggle('on');
+  var card = el.closest('.a-card');
+  if (el.classList.contains('on')) {
+    card.classList.add('uc');
+  } else {
+    card.classList.remove('uc');
+  }
+}
+
+/* Sidebar */
+function toggleSidebar() {
+  document.getElementById('lmsSidebar').classList.toggle('open');
+  document.getElementById('sbArrow').classList.toggle('open');
+}
+
+/* Favbar dropdown */
+var dropTpl = ['Overview','Assignments','Resources','Gradebook','Forums'];
+function toggleDrop(el) {
+  var existing = el.querySelector('.fav-dropdown');
+  // Close all others
+  document.querySelectorAll('.fav-dropdown.open').forEach(function(d) { d.classList.remove('open'); d.parentElement.classList.remove('open'); });
+  if (existing) {
+    el.classList.toggle('open');
+    existing.classList.toggle('open');
+  } else {
+    var dd = document.createElement('div');
+    dd.className = 'fav-dropdown open';
+    dropTpl.forEach(function(t) {
+      var a = document.createElement('span');
+      a.className = 'fav-dropdown-item';
+      a.textContent = t;
+      dd.appendChild(a);
+    });
+    el.appendChild(dd);
+    el.classList.add('open');
+  }
+}
+// Close dropdown on outside tap
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.fav-item')) {
+    document.querySelectorAll('.fav-dropdown.open').forEach(function(d) { d.classList.remove('open'); d.parentElement.classList.remove('open'); });
+  }
+});
+
+/* Textbook toggle */
+function togTb(hd) {
+  var arr = hd.querySelector('.arr');
+  var items = hd.nextElementSibling;
+  if (!items) return;
+  arr.classList.toggle('shut');
+  items.classList.toggle('shut');
+}
+
+/* Settings toggle */
+function togSt(hd) {
+  var arr = hd.querySelector('.arr');
+  var rows = hd.nextElementSibling;
+  if (!rows) return;
+  arr.classList.toggle('shut');
+  rows.classList.toggle('shut');
+}
+
+/* Memo */
+var memos = [];
+function openMemo() {
+  var form = document.getElementById('memoForm');
+  var fab = document.getElementById('memoFab');
+  if (form.classList.contains('open')) {
+    closeMemo();
+  } else {
+    form.classList.add('open');
+    fab.classList.add('rotated');
+    document.getElementById('memoInput').focus();
+  }
+}
+function closeMemo() {
+  document.getElementById('memoForm').classList.remove('open');
+  document.getElementById('memoFab').classList.remove('rotated');
+  document.getElementById('memoInput').value = '';
+}
+function saveMemo() {
+  var text = document.getElementById('memoInput').value.trim();
+  if (!text) return;
+  memos.push(text);
+  renderMemos();
+  closeMemo();
+}
+function deleteMemo(i) {
+  memos.splice(i, 1);
+  renderMemos();
+}
+function renderMemos() {
+  var container = document.getElementById('memoCards');
+  var cnt = document.getElementById('memoCnt');
+  cnt.textContent = '(' + memos.length + ')';
+  container.innerHTML = '';
+  memos.forEach(function(m, i) {
+    var card = document.createElement('div');
+    card.className = 'a-card memo-card';
+    card.innerHTML = '<div class="memo-text">' + escHtml(m) + '</div><button class="memo-del" onclick="deleteMemo(' + i + ')">&#x2715;</button>';
+    container.appendChild(card);
+  });
+}
+function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+/* Open panel on load */
+setTimeout(function() { togglePanel(); }, 400);
+</script>
+
+</body>
+</html>

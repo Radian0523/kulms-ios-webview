@@ -14,6 +14,10 @@ struct CredentialLoginView: View {
     @State private var isSubmitting = false
     @State private var errorText: String?
     @State private var didAutoLogin = false
+    @State private var showDemoLogin = false
+    @State private var demoUsername = ""
+    @State private var demoPassword = ""
+    @State private var demoError = false
     @FocusState private var focusedField: Field?
 
     enum Field { case username, password }
@@ -152,6 +156,20 @@ struct CredentialLoginView: View {
                         .foregroundStyle(.secondary)
                 }
 
+                Divider().padding(.vertical, 16)
+
+                Button {
+                    demoUsername = ""
+                    demoPassword = ""
+                    demoError = false
+                    showDemoLogin = true
+                } label: {
+                    Text("Demo Mode")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                .disabled(isSubmitting)
+
                 Spacer(minLength: 40)
             }
             .padding(.horizontal, 24)
@@ -164,6 +182,32 @@ struct CredentialLoginView: View {
             if newValue == false {
                 didAutoLogin = false
                 tryAutoLogin()
+            }
+        }
+        .alert("Demo Mode", isPresented: $showDemoLogin) {
+            TextField("Username", text: $demoUsername)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            SecureField("Password", text: $demoPassword)
+            Button("Cancel", role: .cancel) {}
+            Button("Login") {
+                if demoUsername == "demo" && demoPassword == "kulms2026" {
+                    appState.isDemoMode = true
+                } else {
+                    demoError = true
+                }
+            }
+        } message: {
+            if demoError {
+                Text("Invalid credentials. Please try again.")
+            } else {
+                Text("Enter demo credentials to continue.")
+            }
+        }
+        .onChange(of: demoError) { _, isError in
+            if isError {
+                showDemoLogin = true
+                demoError = false
             }
         }
     }
