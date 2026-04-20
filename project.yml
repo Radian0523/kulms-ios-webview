@@ -20,6 +20,13 @@ targets:
           - "*.xcodeproj"
           - "*.xcworkspace"
           - "ExtensionFiles"
+          - "build"
+          - ".git"
+          - ".github"
+          - "docs"
+          - "screenshots"
+          - "*.md"
+          - "LICENSE"
       # 拡張機能の JS ファイル（src/ 内）
       - path: ../kulms-extension/src/settings.js
         buildPhase: resources
