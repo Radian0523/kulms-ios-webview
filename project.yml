@@ -68,8 +68,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.radian0523.kulms-plus-for-ios
         PRODUCT_NAME: KULMS
         INFOPLIST_KEY_CFBundleDisplayName: "KULMS+"
-        MARKETING_VERSION: "2.0.1"
-        CURRENT_PROJECT_VERSION: "2"
+        MARKETING_VERSION: "2.0.2"
+        CURRENT_PROJECT_VERSION: "3"
         DEVELOPMENT_TEAM: ""
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
