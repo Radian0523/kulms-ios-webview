@@ -33,6 +33,8 @@ final class KulmsStorageHandler: NSObject, WKScriptMessageHandler {
             handleRemove(keys: body["keys"] as? [String] ?? [], callbackId: callbackId)
         case "clear":
             handleClear(callbackId: callbackId)
+        case "nativeFetch":
+            handleNativeFetch(url: body["url"] as? String ?? "", callbackId: callbackId)
         default:
             sendCallback(callbackId: callbackId, data: [:])
         }
@@ -91,6 +93,41 @@ final class KulmsStorageHandler: NSObject, WKScriptMessageHandler {
     private func handleClear(callbackId: String) {
         saveStore([:])
         sendCallback(callbackId: callbackId, data: [:])
+    }
+
+    // MARK: - Native Fetch
+
+    private func handleNativeFetch(url urlString: String, callbackId: String) {
+        guard let url = URL(string: urlString) else {
+            sendCallback(callbackId: callbackId, data: ["error": "Invalid URL"])
+            return
+        }
+
+        Task.detached { [weak self] in
+            do {
+                let (data, response) = try await URLSession.shared.data(from: url)
+                let httpResponse = response as? HTTPURLResponse
+                let statusCode = httpResponse?.statusCode ?? 200
+
+                // Detect charset from Content-Type header
+                var encoding: String.Encoding = .shiftJIS
+                if let contentType = httpResponse?.value(forHTTPHeaderField: "Content-Type")?.lowercased() {
+                    if contentType.contains("utf-8") {
+                        encoding = .utf8
+                    } else if contentType.contains("euc-jp") || contentType.contains("euc_jp") {
+                        encoding = .japaneseEUC
+                    }
+                }
+
+                let text = String(data: data, encoding: encoding)
+                    ?? String(data: data, encoding: .utf8)
+                    ?? ""
+
+                self?.sendCallback(callbackId: callbackId, data: ["text": text, "status": statusCode])
+            } catch {
+                self?.sendCallback(callbackId: callbackId, data: ["error": error.localizedDescription])
+            }
+        }
     }
 
     // MARK: - Storage

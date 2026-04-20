@@ -34,6 +34,16 @@
     }
   }
 
+  // ---- native fetch proxy for cross-origin requests ----
+  window.__kulmsNativeFetch = function (url) {
+    return new Promise(function (resolve, reject) {
+      postToSwift("nativeFetch", { url: url }, function (result) {
+        if (result && result.error) reject(new Error(result.error));
+        else resolve(result && result.text ? result.text : "");
+      });
+    });
+  };
+
   // ---- chrome.storage ----
   var _changeListeners = [];
 
@@ -129,7 +139,14 @@
       }
     },
     sendMessage: function (message, callback) {
-      // Textbook search etc. — Phase 2. Return empty result.
+      // Route to in-page handlers (e.g. fetchTextbooks)
+      if (message && message.action && window.__kulmsMessageHandlers
+          && window.__kulmsMessageHandlers[message.action]) {
+        window.__kulmsMessageHandlers[message.action](message)
+          .then(function (r) { if (callback) callback(r); })
+          .catch(function () { if (callback) callback(undefined); });
+        return;
+      }
       if (callback) {
         setTimeout(function () {
           callback(undefined);

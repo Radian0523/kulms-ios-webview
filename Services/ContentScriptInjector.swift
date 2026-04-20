@@ -48,7 +48,8 @@ enum ContentScriptInjector {
         // 5. 拡張スクリプト（manifest.json の content_scripts 順、LMS のみ）
         let scriptNames = [
             "settings", "assignments", "submit-detect", "tree-view",
-            "course-name", "course-click", "tool-visibility", "textbooks",
+            "course-name", "course-click", "tool-visibility",
+            "kulms-textbook-handler", "textbooks",
             "sidebar-resize", "top-favbar"
         ]
         for name in scriptNames {

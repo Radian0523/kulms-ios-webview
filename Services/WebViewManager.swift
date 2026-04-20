@@ -26,6 +26,9 @@ class WebViewManager: NSObject {
     /// セッション切れ検知コールバック。
     var onSessionExpired: (() -> Void)?
 
+    /// ポータル到達コールバック（WebView ログイン用自動遷移）。
+    var onPortalReached: (() -> Void)?
+
     private override init() {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .default()
@@ -276,6 +279,18 @@ extension WebViewManager: WKNavigationDelegate {
         // ナビゲーションリスナー通知（ログイン処理用）
         let listeners = navigationListeners
         for l in listeners { l(url) }
+
+        // ポータル到達自動検知（credential login 中以外）
+        if navigationListeners.isEmpty, let callback = onPortalReached {
+            let urlString = url.absoluteString
+            let isPortalPage = urlString.hasPrefix(baseURL + "/portal")
+                && !urlString.contains("/login")
+                && !urlString.contains("/relogin")
+                && !urlString.contains("/logout")
+            if isPortalPage {
+                callback()
+            }
+        }
 
         // セッション切れ検知: LMS → IIMC へリダイレクトされた場合
         if url.host == iimcHost {

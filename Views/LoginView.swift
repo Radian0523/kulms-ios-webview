@@ -28,8 +28,6 @@ struct LoginView: View {
 
 struct WebViewLoginPanel: View {
     @EnvironmentObject private var appState: AppState
-    @State private var isVerifying = false
-    @State private var errorText: String?
 
     let onBack: () -> Void
 
@@ -38,59 +36,19 @@ struct WebViewLoginPanel: View {
             SSOWebView()
 
             VStack(spacing: 8) {
-                if let error = errorText {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                }
-
-                Button {
-                    handleLogin()
-                } label: {
-                    if isVerifying {
-                        HStack(spacing: 8) {
-                            ProgressView()
-                                .controlSize(.small)
-                                .tint(.white)
-                            Text(String(localized: "verifying"))
-                        }
-                        .frame(maxWidth: .infinity)
-                    } else {
-                        Text(String(localized: "loginDone"))
-                            .fontWeight(.semibold)
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .disabled(isVerifying)
-
-                Text(String(localized: "tapAfterAuth"))
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-
                 Button(String(localized: "backToCredentials"), action: onBack)
                     .font(.caption)
-                    .disabled(isVerifying)
             }
             .padding()
             .background(.bar)
         }
-    }
-
-    private func handleLogin() {
-        guard !isVerifying else { return }
-        isVerifying = true
-        errorText = nil
-
-        Task {
-            let valid = await WebViewManager.shared.checkSession()
-            if valid {
+        .onAppear {
+            WebViewManager.shared.onPortalReached = {
                 appState.isLoggedIn = true
-            } else {
-                errorText = String(localized: "sessionNotConfirmed")
             }
-            isVerifying = false
+        }
+        .onDisappear {
+            WebViewManager.shared.onPortalReached = nil
         }
     }
 }
