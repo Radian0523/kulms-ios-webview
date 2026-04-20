@@ -45,13 +45,13 @@
 		49FFB7037D07828D5AD021C7 /* _locales */ = {isa = PBXFileReference; lastKnownFileType = folder; name = _locales; path = "../kulms-extension/_locales"; sourceTree = SOURCE_ROOT; };
 		52AC2FF5F2A59F240F960270 /* assignments.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = assignments.js; sourceTree = "<group>"; };
 		60927FF5D67CB2A5B4238F2C /* top-favbar.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "top-favbar.js"; sourceTree = "<group>"; };
-		61351F9AF3A454F2B080F5BE /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
+		61351F9AF3A454F2B080F5BE /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		65A5C342C8EA6C471D97B645 /* KULMSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KULMSApp.swift; sourceTree = "<group>"; };
 		723BADBFFB62BACC4F002655 /* tool-visibility.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "tool-visibility.js"; sourceTree = "<group>"; };
 		764991651A3DDF7132CB9EC4 /* kulms-textbook-handler.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "kulms-textbook-handler.js"; sourceTree = "<group>"; };
 		853C5093B49C4037F845219C /* WebViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewManager.swift; sourceTree = "<group>"; };
 		87AAE4ECEB2F5DF091AD3730 /* settings.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = settings.js; sourceTree = "<group>"; };
-		BCA10AD070E0B5588FF1ECA3 /* KULMS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KULMS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BCA10AD070E0B5588FF1ECA3 /* KULMS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KULMS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BCFBF2FBD3CF5F0F6B8CB724 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CBDC9E81B34A8BB8EC02CE98 /* tree-view.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "tree-view.js"; sourceTree = "<group>"; };
 		D12E172CD555EF8E0001D3D0 /* KulmsStorageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KulmsStorageHandler.swift; sourceTree = "<group>"; };
@@ -163,10 +163,6 @@
 				BCFBF2FBD3CF5F0F6B8CB724 /* Assets.xcassets */,
 				D81F41F12317220791445F7B /* Info.plist */,
 				65A5C342C8EA6C471D97B645 /* KULMSApp.swift */,
-				AB549CA022E5F19D7C36828B /* Resources */,
-				9F5F3533F19B7A5F47114A15 /* Services */,
-				4B43C08F7A3029B61B1294BE /* Views */,
-				9AC01373B479C37BEAB7F506 /* WebResources */,
 			);
 			name = "kulms-ios-webview";
 			path = .;
@@ -203,7 +199,6 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					08B00D23D7194DE869728628 = {
-						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -293,7 +288,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 3C2S494Q5V;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "KULMS+";
@@ -437,7 +432,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 3C2S494Q5V;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "KULMS+";
