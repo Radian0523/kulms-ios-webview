@@ -33,6 +33,9 @@ Views/
   LoginView.swift              # ログイン画面
   CredentialLoginView.swift    # ID/パスワード入力
   LMSWebView.swift             # LMS表示画面
+demo/
+  demo.html                    # デモモード用静的HTML
+  DemoWebView.swift            # デモ専用WebView画面
 ```
 
 ### アーキテクチャのポイント

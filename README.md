@@ -9,6 +9,7 @@ WKWebView ベースで [kulms-extension](https://github.com/Radian0523/kulms-ext
 - ECS-ID / SPS-ID によるログイン（パスキー / 多要素認証対応）
 - 課題の締切通知
 - パスワードの暗号化保存（iOS Keychain）
+- App Store 審査用デモモード（静的 HTML、本番環境への影響なし）
 
 ## 構成
 
