@@ -1,4 +1,5 @@
 import Foundation
+import QuickLook
 import UIKit
 import WebKit
 
@@ -23,6 +24,8 @@ class WebViewManager: NSObject {
 
     private var navigationListeners: [(URL) -> Void] = []
     private var storageHandler: KulmsStorageHandler?
+    private var pendingDownloadURL: URL?
+    private var previewDataSource: PreviewDataSource?
 
     /// セッション切れ検知コールバック。
     var onSessionExpired: (() -> Void)?
@@ -320,5 +323,96 @@ extension WebViewManager: WKNavigationDelegate {
         }
         // それ以外は全ナビゲーションを許可（SSO フロー対応）
         decisionHandler(.allow)
+    }
+
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationResponse: WKNavigationResponse,
+        decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void
+    ) {
+        let disposition = (navigationResponse.response as? HTTPURLResponse)?
+            .value(forHTTPHeaderField: "Content-Disposition") ?? ""
+        if disposition.lowercased().hasPrefix("attachment") {
+            decisionHandler(.download)
+        } else {
+            decisionHandler(.allow)
+        }
+    }
+
+    // navigationAction からダウンロードに切り替わった場合
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        download.delegate = self
+    }
+
+    // navigationResponse からダウンロードに切り替わった場合
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        download.delegate = self
+    }
+}
+
+// MARK: - WKDownloadDelegate
+
+extension WebViewManager: WKDownloadDelegate {
+    func download(
+        _ download: WKDownload,
+        decideDestinationUsing response: URLResponse,
+        suggestedFilename: String,
+        completionHandler: @escaping (URL?) -> Void
+    ) {
+        let tempDir = FileManager.default.temporaryDirectory
+        let destURL = tempDir.appendingPathComponent("\(UUID().uuidString)-\(suggestedFilename)")
+        pendingDownloadURL = destURL
+        completionHandler(destURL)
+    }
+
+    func downloadDidFinish(_ download: WKDownload) {
+        guard let url = pendingDownloadURL else { return }
+        pendingDownloadURL = nil
+        presentPreview(for: url)
+    }
+
+    func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
+        pendingDownloadURL = nil
+    }
+}
+
+// MARK: - QLPreviewController
+
+extension WebViewManager {
+    private func presentPreview(for url: URL) {
+        guard QLPreviewController.canPreview(url as QLPreviewItem) else {
+            presentShareSheet(for: url)
+            return
+        }
+        guard let rootVC = rootViewController() else { return }
+        let ds = PreviewDataSource(url: url)
+        previewDataSource = ds
+        let preview = QLPreviewController()
+        preview.dataSource = ds
+        rootVC.present(preview, animated: true)
+    }
+
+    private func presentShareSheet(for url: URL) {
+        guard let rootVC = rootViewController() else { return }
+        let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        rootVC.present(activity, animated: true)
+    }
+
+    private func rootViewController() -> UIViewController? {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.windows.first?.rootViewController
+    }
+}
+
+// MARK: - PreviewDataSource
+
+final class PreviewDataSource: NSObject, QLPreviewControllerDataSource {
+    private let url: URL
+    init(url: URL) { self.url = url }
+
+    func numberOfPreviewItems(in controller: QLPreviewController) -> Int { 1 }
+    func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> any QLPreviewItem {
+        url as QLPreviewItem
     }
 }
