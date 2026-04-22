@@ -317,11 +317,11 @@ extension WebViewManager: WKNavigationDelegate {
         // target="_blank" のリンク（targetFrame == nil）の処理
         if navigationAction.targetFrame == nil,
            let url = navigationAction.request.url {
-            if url.host == lmsHost {
-                // LMS ドメイン内: 既存 WebView でロード（ファイルダウンロード等を正しく処理するため）
+            if url.host == lmsHost && url.path.hasPrefix("/access/") {
+                // /access/... のファイルリンクは既存 WebView でロード（ダウンロード処理を発火させるため）
                 webView.load(URLRequest(url: url))
             } else {
-                // LMS ドメイン外: Safari で開く
+                // それ以外（ツールページ等・外部リンク）は Safari で開く
                 UIApplication.shared.open(url)
             }
             decisionHandler(.cancel)
