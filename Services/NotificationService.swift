@@ -54,6 +54,7 @@ final class NotificationService {
             let title: String
             let body: String
             let date: Date
+            let url: String
         }
 
         var candidates: [NotificationCandidate] = []
@@ -95,6 +96,7 @@ final class NotificationService {
             }
 
             let courseName = assignment["courseName"] as? String ?? ""
+            let url = "https://lms.gakusei.kyoto-u.ac.jp/portal/site/\(courseId)"
 
             for offset in offsets {
                 let date = deadline.addingTimeInterval(-Double(offset) * 60)
@@ -116,7 +118,8 @@ final class NotificationService {
                     id: "kulms-\(offset)m-\(compositeKey)",
                     title: title,
                     body: body,
-                    date: date
+                    date: date,
+                    url: url
                 ))
             }
         }
@@ -125,7 +128,7 @@ final class NotificationService {
         candidates.sort { $0.date < $1.date }
         for candidate in candidates.prefix(Self.maxPendingNotifications) {
             schedule(id: candidate.id, title: candidate.title,
-                     body: candidate.body, date: candidate.date)
+                     body: candidate.body, date: candidate.date, url: candidate.url)
         }
     }
 
@@ -141,13 +144,16 @@ final class NotificationService {
         }
     }
 
-    private func schedule(id: String, title: String, body: String, date: Date) {
+    private func schedule(id: String, title: String, body: String, date: Date, url: String = "") {
         guard date > .now else { return }
 
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = .default
+        if !url.isEmpty {
+            content.userInfo = ["targetUrl": url]
+        }
 
         let comps = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute],

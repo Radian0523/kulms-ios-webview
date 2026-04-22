@@ -58,6 +58,13 @@ class WebViewManager: NSObject {
         }
     }
 
+    /// 指定URLへナビゲート（通知タップ等から使用）。
+    func navigate(to urlString: String) {
+        if let url = URL(string: urlString) {
+            webView.load(URLRequest(url: url))
+        }
+    }
+
     // MARK: - Credential login
 
     /// ECS-ID/パスワードを使って KULMS にログインする。

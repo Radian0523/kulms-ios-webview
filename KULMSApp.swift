@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 import WebKit
 
 // MARK: - AppState
@@ -29,6 +30,7 @@ class AppState: ObservableObject {
 @main
 struct KULMSApp: App {
     @StateObject private var appState = AppState()
+    @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
 
     var body: some Scene {
         WindowGroup {
@@ -38,6 +40,7 @@ struct KULMSApp: App {
                     _ = await NotificationService.shared.requestPermission()
                 }
                 .onAppear {
+                    appDelegate.appState = appState
                     // セッション切れ検知
                     WebViewManager.shared.onSessionExpired = { [weak appState] in
                         DispatchQueue.main.async {
@@ -46,6 +49,35 @@ struct KULMSApp: App {
                     }
                 }
         }
+    }
+}
+
+// MARK: - AppDelegate (通知タップハンドラ)
+
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    var appState: AppState?
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        return true
+    }
+
+    // 通知タップ時
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let userInfo = response.notification.request.content.userInfo
+        if let url = userInfo["targetUrl"] as? String, !url.isEmpty {
+            DispatchQueue.main.async {
+                WebViewManager.shared.navigate(to: url)
+            }
+        }
+        completionHandler()
     }
 }
 
