@@ -318,8 +318,8 @@ extension WebViewManager: WKNavigationDelegate {
         if navigationAction.targetFrame == nil,
            let url = navigationAction.request.url {
             if url.host == lmsHost && url.path.hasPrefix("/access/") {
-                // /access/... のファイルリンクは既存 WebView でロード（ダウンロード処理を発火させるため）
-                webView.load(URLRequest(url: url))
+                // /access/... のファイルリンク: WebView の履歴を変えずに直接ダウンロード
+                Task { await self.downloadAndPreview(url: url) }
             } else {
                 // それ以外（ツールページ等・外部リンク）は Safari で開く
                 UIApplication.shared.open(url)
@@ -385,6 +385,49 @@ extension WebViewManager: WKDownloadDelegate {
 // MARK: - QLPreviewController
 
 extension WebViewManager {
+    // WebViewのCookieを引き継いでURLSessionで直接ダウンロードし、プレビュー表示する。
+    // WebViewのナビゲーション履歴を一切変えないため、戻るボタンが維持される。
+    private func downloadAndPreview(url: URL) async {
+        let cookies = await webView.configuration.websiteDataStore.httpCookieStore.allCookies()
+
+        let config = URLSessionConfiguration.ephemeral
+        config.httpCookieStorage = HTTPCookieStorage()
+        config.httpCookieStorage?.setCookies(cookies, for: url, mainDocumentURL: nil)
+        let session = URLSession(configuration: config)
+
+        do {
+            let (tempURL, response) = try await session.download(from: url)
+            let filename = (response as? HTTPURLResponse)?
+                .value(forHTTPHeaderField: "Content-Disposition")
+                .flatMap { Self.extractFilename(from: $0) }
+                ?? (url.lastPathComponent.isEmpty ? "download" : url.lastPathComponent)
+            let destURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("\(UUID().uuidString)-\(filename)")
+            try FileManager.default.moveItem(at: tempURL, to: destURL)
+            await MainActor.run { presentPreview(for: destURL) }
+        } catch {
+            print("[KULMS] Download failed: \(error)")
+        }
+    }
+
+    private static func extractFilename(from contentDisposition: String) -> String? {
+        // RFC 5987: filename*=UTF-8''encoded-name
+        if let range = contentDisposition.range(of: #"filename\*=UTF-8''([^;\s]+)"#,
+                                                  options: .regularExpression) {
+            let encoded = String(contentDisposition[range])
+                .replacingOccurrences(of: "filename*=UTF-8''", with: "")
+            return encoded.removingPercentEncoding
+        }
+        // 通常形式: filename="name.ext"
+        if let range = contentDisposition.range(of: #"filename="?([^";]+)"?"#,
+                                                  options: .regularExpression) {
+            return String(contentDisposition[range])
+                .replacingOccurrences(of: "filename=", with: "")
+                .trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+        }
+        return nil
+    }
+
     private func presentPreview(for url: URL) {
         guard QLPreviewController.canPreview(url as QLPreviewItem) else {
             presentShareSheet(for: url)
