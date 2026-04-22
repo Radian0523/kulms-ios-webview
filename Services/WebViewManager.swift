@@ -314,12 +314,16 @@ extension WebViewManager: WKNavigationDelegate {
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
-        // target="_blank" のリンクのうち、LMS ドメイン外のものは Safari で開く
-        // LMS ドメイン内（/access/... 等のファイルリンクを含む）はアプリ内で処理する
+        // target="_blank" のリンク（targetFrame == nil）の処理
         if navigationAction.targetFrame == nil,
-           let url = navigationAction.request.url,
-           url.host != lmsHost {
-            UIApplication.shared.open(url)
+           let url = navigationAction.request.url {
+            if url.host == lmsHost {
+                // LMS ドメイン内: 既存 WebView でロード（ファイルダウンロード等を正しく処理するため）
+                webView.load(URLRequest(url: url))
+            } else {
+                // LMS ドメイン外: Safari で開く
+                UIApplication.shared.open(url)
+            }
             decisionHandler(.cancel)
             return
         }
