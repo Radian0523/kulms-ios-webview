@@ -397,9 +397,8 @@ extension WebViewManager {
 
         do {
             let (tempURL, response) = try await session.download(from: url)
-            let filename = (response as? HTTPURLResponse)?
-                .value(forHTTPHeaderField: "Content-Disposition")
-                .flatMap { Self.extractFilename(from: $0) }
+            // suggestedFilename はContent-DispositionとURLから拡張子付きファイル名を自動解決する
+            let filename = response.suggestedFilename
                 ?? (url.lastPathComponent.isEmpty ? "download" : url.lastPathComponent)
             let destURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("\(UUID().uuidString)-\(filename)")
@@ -408,24 +407,6 @@ extension WebViewManager {
         } catch {
             print("[KULMS] Download failed: \(error)")
         }
-    }
-
-    private static func extractFilename(from contentDisposition: String) -> String? {
-        // RFC 5987: filename*=UTF-8''encoded-name
-        if let range = contentDisposition.range(of: #"filename\*=UTF-8''([^;\s]+)"#,
-                                                  options: .regularExpression) {
-            let encoded = String(contentDisposition[range])
-                .replacingOccurrences(of: "filename*=UTF-8''", with: "")
-            return encoded.removingPercentEncoding
-        }
-        // 通常形式: filename="name.ext"
-        if let range = contentDisposition.range(of: #"filename="?([^";]+)"?"#,
-                                                  options: .regularExpression) {
-            return String(contentDisposition[range])
-                .replacingOccurrences(of: "filename=", with: "")
-                .trimmingCharacters(in: CharacterSet(charactersIn: "\""))
-        }
-        return nil
     }
 
     private func presentPreview(for url: URL) {
