@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.1.0 (2026-04-24)
+
+- モーダル WKWebView でファイル表示機能を実装
+  - `decidePolicyForNavigationAction` で `target="_blank"` および `/access/` URL を検知
+  - `presentModalWebView(url:)` で同一 WKWebsiteDataStore（Cookie共有）の新 WKWebView をモーダル表示
+  - UINavigationController で閉じるボタン（×）とダウンロードボタン（arrow.down.circle）付き
+  - WKWebView は PDF をネイティブにインライン表示可能
+- `downloadAndShare(url:from:)` でファイルダウンロード → UIActivityViewController で外部アプリに共有
+- ファイル名から UUID プレフィックスを除去（WKDownload パスと downloadAndShare の両方）
+- `hasInitiallyLoaded` フラグ追加: モーダルを閉じた後に LMS トップページに戻るバグを修正（`LMSWebView.onAppear` の `loadPortal()` 二重呼び出し防止）
+
 ## 2.0.4 (2026-04-20)
 
 - Android版テスター募集バナーを追加（拡張機能スクリプト同期）
