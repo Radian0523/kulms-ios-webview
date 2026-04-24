@@ -1,5 +1,4 @@
 import Foundation
-import QuickLook
 import UIKit
 import WebKit
 
@@ -25,7 +24,7 @@ class WebViewManager: NSObject {
     private var navigationListeners: [(URL) -> Void] = []
     private var storageHandler: KulmsStorageHandler?
     private var pendingDownloadURL: URL?
-    private var previewDataSource: PreviewDataSource?
+    private var documentInteractionController: UIDocumentInteractionController?
 
     /// セッション切れ検知コールバック。
     var onSessionExpired: (() -> Void)?
@@ -318,8 +317,10 @@ extension WebViewManager: WKNavigationDelegate {
         if navigationAction.targetFrame == nil,
            let url = navigationAction.request.url {
             if url.host == lmsHost && url.path.hasPrefix("/access/") {
-                // /access/... のファイルリンク: WebView の履歴を変えずに直接ダウンロード
-                Task { await self.downloadAndPreview(url: url) }
+                // /access/... のファイルリンク: モーダル WebView で開く。
+                // 同じ WKWebsiteDataStore を共有するため JS 認証が自動で通る。
+                // メインの WebView の履歴を一切変えないため戻るボタンが維持される。
+                presentModalWebView(url: url)
             } else {
                 // それ以外（ツールページ等・外部リンク）は Safari で開く
                 UIApplication.shared.open(url)
@@ -366,7 +367,8 @@ extension WebViewManager: WKDownloadDelegate {
         completionHandler: @escaping (URL?) -> Void
     ) {
         let tempDir = FileManager.default.temporaryDirectory
-        let destURL = tempDir.appendingPathComponent("\(UUID().uuidString)-\(suggestedFilename)")
+        let destURL = tempDir.appendingPathComponent(suggestedFilename)
+        try? FileManager.default.removeItem(at: destURL)
         pendingDownloadURL = destURL
         completionHandler(destURL)
     }
@@ -382,50 +384,101 @@ extension WebViewManager: WKDownloadDelegate {
     }
 }
 
-// MARK: - QLPreviewController
+// MARK: - File Presentation
 
 extension WebViewManager {
-    // WebViewのCookieを引き継いでURLSessionで直接ダウンロードし、プレビュー表示する。
-    // WebViewのナビゲーション履歴を一切変えないため、戻るボタンが維持される。
-    private func downloadAndPreview(url: URL) async {
+    /// target="_blank" のファイルリンクをモーダル WebView で開く。
+    /// 同じ WKWebsiteDataStore を共有するため JS 認証が自動で通る。
+    /// メインの WebView の履歴を変えないため戻るボタンが維持される。
+    private func presentModalWebView(url: URL) {
+        guard let rootVC = rootViewController() else { return }
+
+        let config = WKWebViewConfiguration()
+        config.websiteDataStore = webView.configuration.websiteDataStore
+        let modalWebView = WKWebView(frame: .zero, configuration: config)
+
+        let vc = UIViewController()
+        vc.view.backgroundColor = .systemBackground
+        modalWebView.translatesAutoresizingMaskIntoConstraints = false
+        vc.view.addSubview(modalWebView)
+        NSLayoutConstraint.activate([
+            modalWebView.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor),
+            modalWebView.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor),
+            modalWebView.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor),
+            modalWebView.bottomAnchor.constraint(equalTo: vc.view.bottomAnchor),
+        ])
+
+        let navVC = UINavigationController(rootViewController: vc)
+        vc.navigationItem.leftBarButtonItem = UIBarButtonItem(
+            systemItem: .close,
+            primaryAction: UIAction { [weak navVC] _ in navVC?.dismiss(animated: true) }
+        )
+        vc.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "arrow.down.circle"),
+            primaryAction: UIAction { [weak self, weak modalWebView, weak vc] _ in
+                guard let self, let currentURL = modalWebView?.url, let vc else { return }
+                Task { await self.downloadAndShare(url: currentURL, from: vc) }
+            }
+        )
+
+        rootVC.present(navVC, animated: true)
+        modalWebView.load(URLRequest(url: url))
+    }
+
+    /// モーダル内のファイルをダウンロードして UIActivityViewController で共有する。
+    /// モーダル WebView 経由で認証済みのため、同じ Cookie で URLSession が通る。
+    private func downloadAndShare(url: URL, from vc: UIViewController) async {
+        var request = URLRequest(url: url)
         let cookies = await webView.configuration.websiteDataStore.httpCookieStore.allCookies()
-
-        let config = URLSessionConfiguration.ephemeral
-        config.httpCookieStorage = HTTPCookieStorage()
-        config.httpCookieStorage?.setCookies(cookies, for: url, mainDocumentURL: nil)
-        let session = URLSession(configuration: config)
-
+        let cookieHeader = cookies.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
+        if !cookieHeader.isEmpty {
+            request.setValue(cookieHeader, forHTTPHeaderField: "Cookie")
+        }
         do {
-            let (tempURL, response) = try await session.download(from: url)
-            // suggestedFilename はContent-DispositionとURLから拡張子付きファイル名を自動解決する
-            let filename = response.suggestedFilename
+            let (tempURL, response) = try await URLSession.shared.download(for: request)
+            var filename = response.suggestedFilename
                 ?? (url.lastPathComponent.isEmpty ? "download" : url.lastPathComponent)
+            if let mimeType = response.mimeType,
+               let ext = Self.extensionForMimeType(mimeType),
+               !filename.lowercased().hasSuffix(".\(ext)") {
+                filename += ".\(ext)"
+            }
             let destURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("\(UUID().uuidString)-\(filename)")
+                .appendingPathComponent(filename)
+            try? FileManager.default.removeItem(at: destURL)
             try FileManager.default.moveItem(at: tempURL, to: destURL)
-            await MainActor.run { presentPreview(for: destURL) }
+            let activityVC = UIActivityViewController(activityItems: [destURL], applicationActivities: nil)
+            if let popover = activityVC.popoverPresentationController {
+                popover.barButtonItem = vc.navigationItem.rightBarButtonItem
+            }
+            vc.present(activityVC, animated: true)
         } catch {
-            print("[KULMS] Download failed: \(error)")
+            print("[KULMS] Download for share failed: \(error)")
         }
     }
 
+    private static func extensionForMimeType(_ mimeType: String) -> String? {
+        switch mimeType.lowercased() {
+        case "application/pdf": return "pdf"
+        case "application/msword": return "doc"
+        case "application/vnd.openxmlformats-officedocument.wordprocessingml.document": return "docx"
+        case "application/vnd.ms-powerpoint": return "ppt"
+        case "application/vnd.openxmlformats-officedocument.presentationml.presentation": return "pptx"
+        case "application/vnd.ms-excel": return "xls"
+        case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": return "xlsx"
+        case "image/jpeg": return "jpg"
+        case "image/png": return "png"
+        default: return nil
+        }
+    }
+
+    /// WKDownload 経由でダウンロードしたファイルを UIDocumentInteractionController で開く。
     private func presentPreview(for url: URL) {
-        guard QLPreviewController.canPreview(url as QLPreviewItem) else {
-            presentShareSheet(for: url)
-            return
-        }
         guard let rootVC = rootViewController() else { return }
-        let ds = PreviewDataSource(url: url)
-        previewDataSource = ds
-        let preview = QLPreviewController()
-        preview.dataSource = ds
-        rootVC.present(preview, animated: true)
-    }
-
-    private func presentShareSheet(for url: URL) {
-        guard let rootVC = rootViewController() else { return }
-        let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-        rootVC.present(activity, animated: true)
+        let dic = UIDocumentInteractionController(url: url)
+        documentInteractionController = dic
+        dic.delegate = self
+        dic.presentOptionsMenu(from: rootVC.view.bounds, in: rootVC.view, animated: true)
     }
 
     private func rootViewController() -> UIViewController? {
@@ -435,14 +488,13 @@ extension WebViewManager {
     }
 }
 
-// MARK: - PreviewDataSource
+// MARK: - UIDocumentInteractionControllerDelegate
 
-final class PreviewDataSource: NSObject, QLPreviewControllerDataSource {
-    private let url: URL
-    init(url: URL) { self.url = url }
-
-    func numberOfPreviewItems(in controller: QLPreviewController) -> Int { 1 }
-    func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> any QLPreviewItem {
-        url as QLPreviewItem
+extension WebViewManager: UIDocumentInteractionControllerDelegate {
+    func documentInteractionControllerViewControllerForPreview(
+        _ controller: UIDocumentInteractionController
+    ) -> UIViewController {
+        rootViewController() ?? UIViewController()
     }
 }
+

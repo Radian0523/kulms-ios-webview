@@ -61,7 +61,10 @@ struct LMSWebView: View {
         }
         .onAppear {
             startObserving()
-            WebViewManager.shared.loadPortal()
+            if !hasInitiallyLoaded {
+                hasInitiallyLoaded = true
+                WebViewManager.shared.loadPortal()
+            }
         }
         .onDisappear {
             stopObserving()
@@ -73,6 +76,7 @@ struct LMSWebView: View {
     @State private var canGoBack = false
     @State private var canGoForward = false
     @State private var showLogoutConfirm = false
+    @State private var hasInitiallyLoaded = false
     @State private var backObserver: NSKeyValueObservation?
     @State private var forwardObserver: NSKeyValueObservation?
 
