@@ -5,32 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>KULMS+ Demo</title>
 <style>
+/* ========== Reset & Base ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  --kulms-color-danger: #e85555;
+  --kulms-color-warning: #d7aa57;
+  --kulms-color-success: #62b665;
+  --kulms-color-other: #777777;
+
   --header-bg: #333435;
-  --primary: #0f4b70;
+  --primary: #003a6b;
+  --logo-blue: #003a6b;
   --favbar-bg: #f3f4f4;
   --sidebar-bg: #e3e4e5;
+  --sidebar-section-bg: #f3f4f4;
   --border: #e3e4e5;
   --body-bg: #fff;
-  --text: #333;
+  --text: #333435;
   --text2: #777;
-  --panel-bg: #e8e8e8;
+  --panel-bg: #cacaca;
   --panel-tab: #6483d3;
-  --danger: #e85555;
-  --warning: #d7aa57;
-  --success: #62b665;
-  --other: #777;
-  --checked: #6582ff;
-  --memo-color: #26a69a;
-  --toggle-on: #4a6fa5;
-  --amazon: #ff9900;
-  --link: #1565c0;
+  --link: #003a6b;
   --syl-bg: #e8eef7;
   --syl-color: #4a6fa5;
   --card-bg: #fff;
+  --row-bg: #f8f9fb;
+  --row-hover: #eef0f5;
 }
+
 @media (prefers-color-scheme: dark) {
   :root {
     --header-bg: #1a1a1b;
@@ -44,792 +47,2873 @@
     --link: #8ab4f8;
     --syl-bg: #2a3548;
     --syl-color: #8ab4f8;
-    --card-bg: #333;
+    --card-bg: #2a2a2a;
+    --row-bg: #2a2a2a;
+    --row-hover: #353535;
   }
 }
 
 html { font-size: 14px; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Segoe UI", Roboto, sans-serif;
   background: var(--body-bg);
   color: var(--text);
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
   min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* ===== Demo Banner ===== */
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
+
+/* ========== Demo Banner ========== */
 .demo-banner {
   background: #fff3cd; color: #856404;
   text-align: center; padding: 5px 16px;
   font-size: 11px; font-weight: 600;
-  position: sticky; top: 0; z-index: 300;
+  position: sticky; top: 0; z-index: 600;
 }
 @media (prefers-color-scheme: dark) {
   .demo-banner { background: #3e2f00; color: #ffd54f; }
 }
 
-/* ===== LMS Header ===== */
+/* ========== LMS Header (Sakai-style with KU blue logo block) ========== */
 .lms-header {
   background: var(--header-bg); color: #fff;
-  padding: 8px 12px;
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 21px; z-index: 250;
+  height: 56px;
+  padding-right: 12px;
 }
-.lms-logo { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; }
+.lms-logo-block {
+  background: var(--logo-blue);
+  height: 100%;
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 14px;
+  min-width: 130px;
+}
+.lms-logo { display: flex; align-items: center; gap: 5px; font-size: 16px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
 .lms-logo .ku-mark {
-  width: 22px; height: 22px; background: var(--primary); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; font-size: 9px;
+  width: 24px; height: 24px; background: #fff; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 11px;
+  color: var(--logo-blue);
 }
-.lms-breadcrumb { font-size: 12px; opacity: 0.7; margin-left: 8px; }
-.header-right { display: flex; align-items: center; gap: 12px; }
-.header-icon { font-size: 16px; opacity: 0.7; cursor: pointer; }
-.header-icon:hover { opacity: 1; }
-.kulms-toggle-btn {
-  background: none; border: 1px solid rgba(255,255,255,0.3);
-  color: #fff; font-size: 10px; font-weight: 700;
-  padding: 3px 8px; border-radius: 4px; cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+.lms-header-mid { display: flex; align-items: center; gap: 6px; flex: 1; padding-left: 12px; min-width: 0; }
+.lms-breadcrumb { font-size: 13px; opacity: 0.95; }
+.lms-breadcrumb-sep { opacity: 0.5; margin: 0 6px; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.header-icon {
+  font-size: 16px; opacity: 0.85; cursor: pointer; position: relative;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  border-radius: 4px;
 }
-.kulms-toggle-btn:hover { border-color: rgba(255,255,255,0.6); }
+.header-icon:active { background: rgba(255,255,255,0.15); }
+.header-icon .notif-red {
+  position: absolute; top: 6px; right: 6px;
+  width: 6px; height: 6px; background: #e53935; border-radius: 50%;
+}
+.kulms-hamburger-btn {
+  border: none; background: transparent; color: #fff;
+  font-size: 22px; cursor: pointer; padding: 4px 10px; line-height: 1;
+  border-radius: 4px;
+}
+.kulms-hamburger-btn:active { background: rgba(255,255,255,0.15); }
 
-/* ===== Top Favbar ===== */
-.top-favbar {
-  display: flex; flex-wrap: wrap; gap: 5px;
-  padding: 5px 10px; background: var(--favbar-bg);
+/* Top alert banner (Sakai PA system style) */
+.lms-alert-banner {
+  background: #fff8e1; color: #5c4500;
+  border-left: 4px solid #d7aa57;
+  padding: 8px 32px 8px 12px;
+  font-size: 12px; line-height: 1.4;
+  display: flex; align-items: flex-start; gap: 8px;
+  position: relative;
+}
+.lms-alert-banner .ico { font-size: 14px; flex-shrink: 0; }
+.lms-alert-banner .close {
+  position: absolute; top: 6px; right: 8px;
+  background: none; border: none; cursor: pointer;
+  color: #5c4500; font-size: 14px; padding: 2px 6px;
+}
+@media (prefers-color-scheme: dark) {
+  .lms-alert-banner { background: #3d2f00; color: #ffd54f; }
+  .lms-alert-banner .close { color: #ffd54f; }
+}
+
+/* ========== Top Favbar ========== */
+.kulms-top-favbar {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 6px 10px;
+  background: var(--favbar-bg);
   border-bottom: 1px solid rgba(0,0,0,0.08);
+  --favitem-font: 12px;
+  --favitem-py: 3px;
+  --favitem-px: 8px;
 }
-.fav-item {
+.kulms-top-favbar.size-small { --favitem-font: 11px; --favitem-py: 2px; --favitem-px: 6px; }
+.kulms-top-favbar.size-large { --favitem-font: 13px; --favitem-py: 5px; --favitem-px: 11px; }
+.kulms-top-favbar.size-xlarge { --favitem-font: 15px; --favitem-py: 7px; --favitem-px: 14px; }
+
+.kulms-top-favbar-item {
+  position: relative;
   display: inline-flex; align-items: center;
-  padding: 3px 8px; font-size: 11px;
-  border-left: 3px solid var(--other); border-radius: 4px;
-  background: rgba(0,0,0,0.04); white-space: nowrap;
-  color: var(--text); cursor: pointer; position: relative;
-  -webkit-tap-highlight-color: transparent;
+  gap: 4px;
+  padding: var(--favitem-py) var(--favitem-px);
+  font-size: var(--favitem-font);
+  border-left: 3px solid transparent;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.04);
+  white-space: nowrap;
+  color: var(--text);
+  cursor: pointer;
 }
-.fav-item::after { content: '\25BE'; margin-left: 3px; font-size: 9px; opacity: 0.4; }
-.fav-item.open { background: rgba(0,0,0,0.1); }
-.fav-item.open::after { transform: rotate(180deg); }
-.now-badge, .next-badge {
-  display: inline-block; padding: 0 4px; border-radius: 6px;
-  font-size: 8px; font-weight: 700; color: #fff; margin-left: 3px; vertical-align: middle;
-}
-.now-badge { background: #e53935; animation: pulse 2s infinite; }
-.next-badge { background: #1976d2; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+.kulms-top-favbar-item.cs-tab-danger { border-left-color: var(--kulms-color-danger); }
+.kulms-top-favbar-item.cs-tab-warning { border-left-color: var(--kulms-color-warning); }
+.kulms-top-favbar-item.cs-tab-success { border-left-color: var(--kulms-color-success); }
+.kulms-top-favbar-item.cs-tab-other { border-left-color: var(--kulms-color-other); }
 
-/* Dropdown */
-.fav-dropdown {
-  display: none; position: absolute; top: 100%; left: 0; z-index: 500;
-  background: var(--card-bg); border: 1px solid #d0d7de; border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15); padding: 4px 0;
-  min-width: 180px; margin-top: 4px;
-}
-.fav-dropdown.open { display: block; }
-.fav-dropdown-item {
-  display: block; padding: 7px 12px; font-size: 12px;
-  color: var(--text); text-decoration: none; border-radius: 4px; margin: 0 4px;
-}
-.fav-dropdown-item:active { background: #e8f0fe; }
+.kulms-top-favbar.color-background .kulms-top-favbar-item.cs-tab-danger { background: rgba(232,85,85,0.18); }
+.kulms-top-favbar.color-background .kulms-top-favbar-item.cs-tab-warning { background: rgba(215,170,87,0.18); }
+.kulms-top-favbar.color-background .kulms-top-favbar-item.cs-tab-success { background: rgba(98,182,101,0.18); }
+.kulms-top-favbar.color-background .kulms-top-favbar-item.cs-tab-other { background: rgba(119,119,119,0.18); }
 
-/* ===== Main Page ===== */
-.lms-page { padding: 12px; }
-.lms-section-title {
-  font-size: 12px; font-weight: 600; color: var(--text2);
-  padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px;
-}
-.lms-card {
-  background: var(--favbar-bg); border-radius: 6px;
-  padding: 10px 12px; margin-bottom: 8px; font-size: 12px; line-height: 1.5;
-}
-.lms-card-title { font-weight: 600; margin-bottom: 2px; }
-.lms-card-meta { font-size: 10px; color: var(--text2); margin-top: 3px; }
+.kulms-top-favbar.color-bold .kulms-top-favbar-item { border-left-width: 5px; }
+.kulms-top-favbar.color-bold .kulms-top-favbar-item.cs-tab-danger { background: rgba(232,85,85,0.10); }
+.kulms-top-favbar.color-bold .kulms-top-favbar-item.cs-tab-warning { background: rgba(215,170,87,0.10); }
+.kulms-top-favbar.color-bold .kulms-top-favbar-item.cs-tab-success { background: rgba(98,182,101,0.10); }
+.kulms-top-favbar.color-bold .kulms-top-favbar-item.cs-tab-other { background: rgba(119,119,119,0.10); }
 
-/* Sidebar (collapsible on mobile) */
-.lms-sidebar { display: none; }
-.lms-sidebar.open {
-  display: block; background: var(--sidebar-bg);
-  border-bottom: 1px solid var(--border); padding: 6px 0;
+.kulms-top-favbar-item::after {
+  content: ""; display: inline-block; width: 0; height: 0;
+  margin-left: 3px;
+  border-left: 4px solid transparent; border-right: 4px solid transparent;
+  border-top: 5px solid currentColor; opacity: 0.55;
+  transition: transform 0.15s;
 }
+.kulms-top-favbar-item.is-open::after { transform: rotate(180deg); opacity: 0.9; }
+.kulms-top-favbar-item.is-open { background: rgba(0,0,0,0.1) !important; }
+
+.kulms-now-badge {
+  display: inline-block; padding: 0 5px; border-radius: 8px;
+  font-size: 9px; font-weight: 700; color: #fff; line-height: 16px;
+  background: #e53935; animation: kulms-now-pulse 2s ease-in-out infinite;
+}
+.kulms-now-badge.is-next { background: #1976d2; animation: none; }
+@keyframes kulms-now-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+.kulms-notification-badge {
+  width: 8px; height: 8px; background: #e85555; border-radius: 50%;
+}
+
+.kulms-favbar-dropdown {
+  position: fixed; z-index: 950;
+  background: var(--card-bg);
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 6px 0; min-width: 200px; max-width: 300px;
+  max-height: calc(100vh - 100px); overflow-y: auto;
+  font-size: 13px;
+}
+.kulms-favbar-dropdown-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; margin: 2px 6px; border-radius: 6px;
+  color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kulms-favbar-dropdown-item:active { background: #e8f0fe; color: #1a73e8; }
+.kulms-favbar-dropdown-item .icon { width: 16px; text-align: center; opacity: 0.75; flex-shrink: 0; }
+@media (prefers-color-scheme: dark) {
+  .kulms-favbar-dropdown { border-color: #3d4147; }
+  .kulms-favbar-dropdown-item:active { background: rgba(138,180,248,0.15); color: #8ab4f8; }
+}
+
+/* ========== Sidebar (Sakai pin list) ========== */
 .sidebar-toggle-btn {
   display: flex; align-items: center; gap: 6px;
-  padding: 8px 12px; background: var(--sidebar-bg);
+  padding: 10px 14px; background: var(--sidebar-section-bg);
   border-bottom: 1px solid var(--border);
-  font-size: 12px; color: var(--text2); cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  font-size: 14px; font-weight: 700; color: var(--text); cursor: pointer;
 }
-.sidebar-toggle-btn .arrow { font-size: 9px; transition: transform 0.2s; }
+.sidebar-toggle-btn .arrow { font-size: 9px; transition: transform 0.2s; opacity: 0.7; }
 .sidebar-toggle-btn .arrow.open { transform: rotate(90deg); }
+.sidebar-toggle-btn .grid-ico { font-size: 13px; opacity: 0.6; margin-left: auto; }
+
+.lms-sidebar {
+  display: none; background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--border); padding: 0;
+}
+.lms-sidebar.open { display: block; }
+
+.sidebar-pin-heading {
+  background: var(--sidebar-section-bg);
+  font-size: 14px; font-weight: 700; color: var(--text);
+  padding: 12px 14px 8px;
+  border-top: 1px solid var(--border);
+}
+@media (prefers-color-scheme: dark) {
+  .sidebar-pin-heading { background: #2a2a2a; }
+}
+
+.sb-home-section {
+  background: var(--sidebar-section-bg);
+  padding: 6px 0;
+}
+@media (prefers-color-scheme: dark) {
+  .sb-home-section { background: #2a2a2a; }
+}
+.sb-home-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; font-size: 14px; font-weight: 600; color: var(--text);
+  cursor: pointer;
+}
+.sb-home-arrow { font-size: 11px; opacity: 0.7; }
+.sb-home-tool {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px 8px 30px; font-size: 13px; color: var(--text);
+  cursor: pointer;
+}
+.sb-home-tool .ico { width: 16px; text-align: center; opacity: 0.7; font-size: 13px; }
+.sb-home-tool:active { background: rgba(0,0,0,0.04); }
+.sb-home-tool.sb-home-active {
+  background: rgba(0, 58, 107, 0.08);
+  border-left: 4px solid var(--logo-blue);
+  padding-left: 26px; font-weight: 600;
+}
+.sb-home-other {
+  font-size: 12px; color: var(--text2);
+  padding: 6px 14px 4px 30px; cursor: pointer;
+}
+
 .sb-item {
   display: flex; align-items: center; gap: 8px;
-  padding: 6px 14px; font-size: 12px; color: var(--text);
+  padding: 10px 14px; font-size: 14px; color: var(--text);
+  border-left: 4px solid #888; cursor: pointer;
+  position: relative;
+  background: rgba(0,0,0,0.02);
 }
-.sb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.sb-pin { margin-left: auto; font-size: 10px; color: var(--text2); }
+.sb-item:active { background: rgba(0,0,0,0.06); }
+.sb-item.cs-tab-danger { border-left-color: var(--kulms-color-danger); }
+.sb-item.cs-tab-warning { border-left-color: var(--kulms-color-warning); }
+.sb-item.cs-tab-success { border-left-color: var(--kulms-color-success); }
+.sb-item.cs-tab-other { border-left-color: var(--kulms-color-other); }
 
-/* ===== KULMS+ Panel (slide-in overlay) ===== */
+.sidebar-color-background .sb-item.cs-tab-danger { background: rgba(232,85,85,0.18); }
+.sidebar-color-background .sb-item.cs-tab-warning { background: rgba(215,170,87,0.18); }
+.sidebar-color-background .sb-item.cs-tab-success { background: rgba(98,182,101,0.18); }
+.sidebar-color-background .sb-item.cs-tab-other { background: rgba(119,119,119,0.18); }
+
+.sidebar-color-bold .sb-item { border-left-width: 6px; }
+.sidebar-color-bold .sb-item.cs-tab-danger { background: rgba(232,85,85,0.10); }
+.sidebar-color-bold .sb-item.cs-tab-warning { background: rgba(215,170,87,0.10); }
+.sidebar-color-bold .sb-item.cs-tab-success { background: rgba(98,182,101,0.10); }
+.sidebar-color-bold .sb-item.cs-tab-other { background: rgba(119,119,119,0.10); }
+
+.sb-item .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-item .pin-icon { font-size: 11px; color: var(--text2); }
+.sb-item .notif-dot {
+  width: 7px; height: 7px; background: var(--kulms-color-danger); border-radius: 50%;
+}
+
+.sb-tools {
+  display: none; padding: 4px 0; background: rgba(0,0,0,0.03);
+}
+.sb-item.expanded + .sb-tools { display: block; }
+.sb-tool {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px 6px 32px; font-size: 12px; color: var(--text2);
+}
+.sb-tool .icon { width: 14px; text-align: center; opacity: 0.7; }
+.sb-tool:active { background: rgba(0,0,0,0.05); }
+
+/* ========== Main Page (Sakai portlet style) ========== */
+.lms-page { padding: 0 0 80px; }
+.lms-portlet {
+  margin: 12px;
+  background: var(--card-bg);
+  border-radius: 0;
+  border-bottom: 1px solid var(--border);
+}
+.lms-portlet-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 4px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.lms-portlet-title {
+  font-size: 15px; font-weight: 600; color: var(--text);
+}
+.lms-portlet-link {
+  font-size: 12px; color: var(--link); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.lms-portlet-link::before { content: "🔗"; font-size: 11px; opacity: 0.7; }
+.lms-portlet-body { padding: 8px 4px 12px; }
+.lms-section-title {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  padding: 12px 12px 6px; border-bottom: 1px solid var(--border); margin: 0 0 8px;
+}
+.lms-card {
+  background: var(--card-bg); border-radius: 6px;
+  padding: 10px 12px; margin: 0 12px 8px; font-size: 13px; line-height: 1.5;
+  border: 1px solid var(--border);
+}
+.lms-card-title { font-weight: 600; margin-bottom: 4px; color: var(--text); font-size: 14px; }
+.lms-card-meta { font-size: 11px; color: var(--text2); margin-top: 6px; }
+.lms-card-link {
+  font-size: 13px; color: var(--link); text-decoration: none;
+  display: block; padding: 4px 0;
+}
+
+/* ========== Course tool sub-nav ========== */
+.tool-subnav {
+  display: flex; flex-wrap: wrap; gap: 0;
+  background: var(--sidebar-section-bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+}
+.tool-subnav-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 14px; font-size: 13px;
+  color: var(--text); cursor: pointer;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+.tool-subnav-item.active {
+  color: var(--logo-blue); font-weight: 600;
+  border-bottom-color: var(--logo-blue);
+  background: var(--card-bg);
+}
+.tool-subnav-item .ico { font-size: 13px; opacity: 0.7; }
+@media (prefers-color-scheme: dark) {
+  .tool-subnav-item.active { color: #8ab4f8; border-bottom-color: #8ab4f8; }
+}
+
+.lms-back-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; background: var(--sidebar-section-bg);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; color: var(--text2); cursor: pointer;
+}
+.lms-back-bar:active { background: var(--row-hover); }
+.lms-back-bar .arrow { font-size: 14px; }
+
+/* ========== Tool pages ========== */
+.tool-page-title {
+  font-size: 18px; font-weight: 700;
+  padding: 16px 14px 4px; color: var(--text);
+}
+.tool-page-meta {
+  font-size: 12px; color: var(--text2);
+  padding: 0 14px 12px; border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+/* Resources page table */
+.res-table {
+  margin: 0 12px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.res-table-header {
+  display: grid;
+  grid-template-columns: 28px 1fr 90px;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--sidebar-section-bg);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 700; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.res-table-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 90px;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; align-items: center;
+}
+.res-table-row:last-child { border-bottom: none; }
+.res-table-row.folder { cursor: pointer; }
+.res-table-row .ico { font-size: 16px; }
+.res-table-row .name a { color: var(--link); }
+.res-table-row .meta { font-size: 11px; color: var(--text2); text-align: right; }
+.res-table-row.indent-1 { padding-left: 32px; }
+.res-table-row.indent-2 { padding-left: 52px; }
+.res-table-row.collapsed-children { display: none; }
+
+/* Assignments table */
+.assign-list {
+  margin: 0 12px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.assign-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; gap: 12px;
+}
+.assign-row:last-child { border-bottom: none; }
+.assign-row-name { font-weight: 600; color: var(--link); flex: 1; min-width: 0; }
+.assign-row-meta { font-size: 11px; color: var(--text2); text-align: right; }
+
+/* Forum threads */
+.forum-list {
+  margin: 0 12px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.forum-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 12px; border-bottom: 1px solid var(--border);
+}
+.forum-row:last-child { border-bottom: none; }
+.forum-row .avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--logo-blue); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+.forum-row .body { flex: 1; min-width: 0; }
+.forum-row .title { font-weight: 600; color: var(--link); font-size: 13px; }
+.forum-row .meta { font-size: 11px; color: var(--text2); margin-top: 4px; }
+.forum-row .preview { font-size: 12px; color: var(--text); margin-top: 4px; }
+.forum-row .count {
+  font-size: 11px; color: var(--text2);
+  background: var(--sidebar-section-bg);
+  padding: 2px 8px; border-radius: 10px; flex-shrink: 0;
+}
+
+/* Gradebook */
+.grade-table {
+  margin: 0 12px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.grade-row {
+  display: grid;
+  grid-template-columns: 1fr 70px 70px;
+  gap: 8px; padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; align-items: center;
+}
+.grade-row.header {
+  background: var(--sidebar-section-bg);
+  font-size: 11px; font-weight: 700; color: var(--text2);
+  text-transform: uppercase;
+}
+.grade-row:last-child { border-bottom: none; }
+.grade-row .grade { font-weight: 700; text-align: center; }
+.grade-row .score { font-weight: 600; text-align: center; color: var(--text); }
+.grade-row .grade.A { color: #2e7d32; }
+.grade-row .grade.B { color: #1565c0; }
+.grade-row .grade.C { color: #f57c00; }
+
+/* Syllabus */
+.syllabus-card {
+  margin: 0 12px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px;
+}
+.syllabus-row {
+  display: flex; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.syllabus-row:last-child { border-bottom: none; }
+.syllabus-row .label { width: 80px; font-weight: 600; color: var(--text2); flex-shrink: 0; }
+.syllabus-row .val { flex: 1; min-width: 0; }
+.syllabus-section {
+  margin-top: 12px;
+}
+.syllabus-section-title {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  padding: 8px 0 4px;
+}
+.syllabus-section-body { font-size: 13px; line-height: 1.6; }
+
+/* Resources tree (mock) */
+.res-tree { background: var(--row-bg); border-radius: 6px; padding: 8px; }
+.res-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 6px; font-size: 12px; border-bottom: 1px solid var(--border);
+}
+.res-row:last-child { border-bottom: none; }
+.res-row .ico { width: 16px; text-align: center; }
+.res-row.depth-1 { padding-left: 22px; }
+.res-row.depth-2 { padding-left: 38px; }
+.res-row .name { flex: 1; color: var(--link); }
+.res-row.folder { cursor: pointer; }
+.res-row.folder .arrow { font-size: 9px; color: var(--text2); transition: transform 0.2s; }
+.res-row.folder.collapsed .arrow { transform: rotate(-90deg); }
+.res-row.folder.collapsed + .res-children { display: none; }
+
+.lms-footer {
+  padding: 16px; font-size: 10px; color: var(--text2);
+  text-align: center; border-top: 1px solid var(--border);
+}
+
+/* ========== KULMS+ Panel ========== */
 .panel-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.3); z-index: 400;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3); z-index: 99999;
   opacity: 0; pointer-events: none; transition: opacity 0.3s;
 }
 .panel-overlay.open { opacity: 1; pointer-events: auto; }
 
-.kulms-panel {
-  position: fixed; right: -310px; top: 0; bottom: 0;
-  width: 300px; max-width: 85vw;
-  background: var(--panel-bg); z-index: 450;
+#kulms-assign-panel {
+  position: fixed; top: 0; right: 0;
+  width: 0; height: 100vh;
+  z-index: 100000;
+  background: var(--panel-bg);
+  border-radius: 8px 0 0 8px;
+  box-shadow: -2px 0 15px rgba(0,0,0,0.2);
   display: flex; flex-direction: column;
-  transition: right 0.35s ease;
-  box-shadow: -2px 0 12px rgba(0,0,0,0.15);
+  font-family: inherit;
+  transition: width 0.45s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
 }
-.kulms-panel.open { right: 0; }
+#kulms-assign-panel.open { width: min(320px, 90vw); }
 
-/* Panel Header */
-.p-header {
+.kulms-assign-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 12px; flex-shrink: 0;
 }
-.p-logo { font-size: 14px; font-weight: 700; color: #464646; }
-.p-version { font-size: 11px; color: #888; margin-left: 6px; }
-@media (prefers-color-scheme: dark) { .p-logo { color: #ddd; } }
-.p-btns { display: flex; gap: 4px; }
-.p-btn {
-  width: 30px; height: 24px; border: none; background: transparent;
-  border-radius: 6px; color: #666; font-size: 14px; cursor: pointer;
+.kulms-assign-logo {
+  font-size: 14px; font-weight: 700; color: #464646;
+}
+@media (prefers-color-scheme: dark) { .kulms-assign-logo { color: #ddd; } }
+.kulms-assign-version {
+  font-size: 11px; color: #888; margin-left: 6px;
+}
+.kulms-assign-header-right { display: flex; align-items: center; gap: 4px; }
+.kulms-assign-header-btn,
+.kulms-assign-close {
+  width: 30px; height: 30px; border: none; background: transparent;
+  cursor: pointer; border-radius: 6px; font-size: 16px; color: #666;
   display: flex; align-items: center; justify-content: center;
-  -webkit-tap-highlight-color: transparent;
 }
-.p-btn:active { background: rgba(0,0,0,0.1); }
-
-/* Panel Tabs */
-.p-tabs { display: flex; padding: 0 8px; flex-shrink: 0; }
-.p-tab {
-  flex: 1; text-align: center; padding: 8px 0;
-  font-size: 13px; font-weight: 600; color: #666;
-  border-radius: 6px 6px 0 0; cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  -webkit-tap-highlight-color: transparent;
-}
-@media (prefers-color-scheme: dark) { .p-tab { color: #999; } }
-.p-tab.active { background: var(--panel-tab); color: #fff; }
-
-/* Panel Content */
-.p-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.p-cache { padding: 4px 12px; font-size: 11px; color: #777; }
-.p-tc { display: none; }
-.p-tc.active { display: block; }
-
-/* ===== Assignment Section ===== */
-.a-sec { margin: 0 8px 4px; }
-.a-sec-hd {
-  display: flex; align-items: center; font-size: 13px; font-weight: 600;
-  padding: 6px 8px; border-radius: 5px; cursor: pointer;
-  -webkit-tap-highlight-color: transparent; user-select: none;
-}
-.a-sec-hd .arr {
-  font-size: 10px; margin-right: 6px; transition: transform 0.2s;
-  display: inline-block;
-}
-.a-sec-hd .arr.shut { transform: rotate(-90deg); }
-.a-sec-hd .cnt { margin-left: 4px; font-weight: 400; }
-
-.sec-danger  { border-left:6px solid var(--danger);  background:#f1cdcd; color:#8b2020; }
-.sec-warning { border-left:6px solid var(--warning); background:#e2d4bf; color:#6b4f1a; }
-.sec-success { border-left:6px solid var(--success); background:#cce6cf; color:#1e5e20; }
-.sec-other   { border-left:6px solid var(--other);   background:#e0e0e0; color:#444; }
-.sec-checked { border-left:6px solid var(--checked); background:#c6d1fc; color:#2a3d8f; }
-.sec-memo    { border-left:6px solid var(--memo-color); background:#c8ece9; color:#1a5d56; }
+.kulms-assign-close { font-size: 22px; }
+.kulms-assign-header-btn:active,
+.kulms-assign-close:active { background: rgba(0,0,0,0.08); }
+.kulms-assign-header-btn.spinning { animation: kulms-spin 0.8s linear infinite; }
 @media (prefers-color-scheme: dark) {
-  .sec-danger  { background:#3d1c1c; color:#f1a0a0; }
-  .sec-warning { background:#3d3018; color:#d7c090; }
-  .sec-success { background:#1c3d1e; color:#a0d4a3; }
-  .sec-other   { background:#333; color:#bbb; }
-  .sec-checked { background:#1c2050; color:#a0b0f0; }
-  .sec-memo    { background:#1a3330; color:#90d0c8; }
+  .kulms-assign-header-btn, .kulms-assign-close { color: #ccc; }
+  .kulms-assign-header-btn:active, .kulms-assign-close:active { background: rgba(255,255,255,0.1); }
 }
 
-/* Cards container */
-.a-cards { padding: 4px 8px; overflow: hidden; transition: max-height 0.3s ease; }
-.a-cards.shut { max-height: 0 !important; padding: 0 8px; }
+/* Tab Bar */
+.kulms-panel-tab-bar {
+  display: flex; flex-shrink: 0; padding: 0 8px;
+}
+.kulms-panel-tab {
+  flex: 1; text-align: center; padding: 8px 0;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  color: #666; background: transparent; border: none;
+  border-radius: 6px 6px 0 0;
+  transition: background 0.2s, color 0.2s;
+}
+@media (prefers-color-scheme: dark) { .kulms-panel-tab { color: #999; } }
+.kulms-panel-tab.active { background: var(--panel-tab); color: #fff; }
+
+.kulms-assign-cache-info {
+  padding: 4px 12px; font-size: 11px; color: #777; flex-shrink: 0;
+}
+
+.kulms-assign-content {
+  flex: 1; overflow-y: auto; padding: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Section Header */
+.kulms-assign-section { margin-bottom: 10px; }
+.kulms-assign-section-header {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600;
+  padding: 6px 8px; cursor: pointer; user-select: none;
+  border-radius: 5px; margin-bottom: 6px;
+}
+.kulms-section-overdue { border-left: 6px solid #b71c1c; background: #e8b0b0; color: #5c0e0e; }
+.kulms-section-danger { border-left: 6px solid var(--kulms-color-danger); background: #f1cdcd; color: #8b2020; }
+.kulms-section-warning { border-left: 6px solid var(--kulms-color-warning); background: #e2d4bf; color: #6b4f1a; }
+.kulms-section-success { border-left: 6px solid var(--kulms-color-success); background: #cce6cf; color: #1e5e20; }
+.kulms-section-other { border-left: 6px solid var(--kulms-color-other); background: #e0e0e0; color: #444; }
+.kulms-section-checked { border-left: 6px solid #6582ff; background: #c6d1fc; color: #2a3d8f; }
+.kulms-section-memo { border-left: 6px solid #26a69a; background: #c8ece9; color: #1a5d56; }
+.kulms-section-deleted { border-left: 6px solid #aaa; background: #e8e8e8; color: #777; }
+@media (prefers-color-scheme: dark) {
+  .kulms-section-overdue { background: #4a1a1a; color: #f0a0a0; }
+  .kulms-section-danger { background: #3d1c1c; color: #f1a0a0; }
+  .kulms-section-warning { background: #3d3018; color: #d7c090; }
+  .kulms-section-success { background: #1c3d1e; color: #a0d4a3; }
+  .kulms-section-other { background: #333; color: #bbb; }
+  .kulms-section-checked { background: #1c2050; color: #a0b0f0; }
+  .kulms-section-memo { background: #1a3330; color: #90d0c8; }
+  .kulms-section-deleted { background: #2a2a2a; color: #888; }
+}
+.kulms-assign-section-toggle {
+  font-size: 10px; transition: transform 0.2s;
+}
+.kulms-assign-section-toggle.collapsed { transform: rotate(-90deg); }
+.kulms-assign-section-count { font-weight: 400; opacity: 0.7; }
+.kulms-assign-section-items { display: block; }
+.kulms-assign-section-items.collapsed { display: none; }
 
 /* Card */
-.a-card {
+.kulms-assign-card {
   display: flex; align-items: flex-start; gap: 8px;
-  background: var(--card-bg); border: 2px solid var(--other);
-  border-radius: 10px; padding: 8px; margin-bottom: 6px; position: relative;
+  background: var(--card-bg); border: 2px solid #777;
+  border-radius: 10px; padding: 8px; margin-bottom: 6px;
+  position: relative;
 }
-.a-card.ud { border-color: var(--danger); }
-.a-card.uw { border-color: var(--warning); }
-.a-card.us { border-color: var(--success); }
-.a-card.uc { border-color: var(--checked); opacity: 0.7; }
+.kulms-assign-card.urgency-danger,
+.kulms-assign-card.urgency-overdue { border-color: var(--kulms-color-danger); }
+.kulms-assign-card.urgency-warning { border-color: var(--kulms-color-warning); }
+.kulms-assign-card.urgency-success { border-color: var(--kulms-color-success); }
+.kulms-assign-card.urgency-other { border-color: var(--kulms-color-other); }
+.kulms-assign-card.kulms-checked { border-color: #6582ff; opacity: 0.7; }
+.kulms-assign-card.kulms-memo-card { border-color: #26a69a; flex-direction: column; gap: 4px; }
+.kulms-assign-card.kulms-deleted-card { opacity: 0.7; border-color: #ccc; }
+.kulms-assign-card.kulms-deleted-card .kulms-assign-card-name { text-decoration: line-through; color: #999; }
 
-/* Checkbox */
-.a-cb {
-  width: 16px; height: 16px; border: 2px solid #aaa;
-  border-radius: 50%; flex-shrink: 0; margin-top: 2px; cursor: pointer;
-  -webkit-tap-highlight-color: transparent; transition: all 0.15s;
+.kulms-assign-card-body { flex: 1; min-width: 0; }
+
+.kulms-checkbox {
+  width: 16px; height: 16px; min-width: 16px;
+  border: 2px solid #aaa; border-radius: 50%;
+  cursor: pointer; margin-top: 2px;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
 }
-.a-cb:active { border-color: #0064cd; }
-.a-cb.on { background: #0064cd; border-color: #0064cd; }
+.kulms-checkbox:active { border-color: #0064cd; }
+.kulms-checkbox.checked { background: #0064cd; border-color: #0064cd; }
 
-.a-body { flex: 1; min-width: 0; }
-.a-pill {
+.kulms-badge-row {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 4px; margin-bottom: 3px;
+}
+
+.kulms-course-pill {
   display: inline-block; padding: 1px 8px; border-radius: 20px;
-  font-size: 10px; font-weight: 600; color: #fff; margin-bottom: 3px;
+  font-size: 10px; font-weight: 600; color: #fff;
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.a-badge {
-  display: inline-block; padding: 1px 7px; border-radius: 10px;
-  font-size: 10px; font-weight: 600; margin-left: 4px; vertical-align: middle;
-}
-.bg-notsub { background: #ffebee; color: #c62828; }
-.bg-sub { background: #e8f5e9; color: #2e7d32; }
-.bg-graded { background: #e3f2fd; color: #1565c0; }
-@media (prefers-color-scheme: dark) {
-  .bg-notsub { background:#3d1c1c; color:#ef9a9a; }
-  .bg-sub { background:#1c3d1e; color:#a5d6a7; }
-  .bg-graded { background:#1c2040; color:#90b0f0; }
-}
-.a-name { font-size: 12px; font-weight: 600; margin-bottom: 2px; color: var(--link); }
-.a-meta { display: flex; gap: 6px; font-size: 11px; color: #777; flex-wrap: wrap; }
-.a-time { font-weight: 700; font-size: 11px; color: var(--text); }
-.a-time.dng { color: var(--danger); }
+.kulms-course-pill.urgency-danger,
+.kulms-course-pill.urgency-overdue { background: var(--kulms-color-danger); }
+.kulms-course-pill.urgency-warning { background: var(--kulms-color-warning); }
+.kulms-course-pill.urgency-success { background: var(--kulms-color-success); }
+.kulms-course-pill.urgency-other { background: var(--kulms-color-other); }
+.kulms-pill-deleted { background: #aaa; color: #fff; }
 
-/* Memo */
-.memo-fab {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: var(--memo-color); color: #fff; border: none;
-  font-size: 22px; display: flex; align-items: center; justify-content: center;
-  margin: 8px auto; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-  transition: transform 0.2s;
+.kulms-assign-badge {
+  display: inline-block; padding: 1px 7px; border-radius: 10px;
+  font-size: 10px; font-weight: 600;
 }
-.memo-fab:active { transform: scale(0.9); }
-.memo-fab.rotated { transform: rotate(45deg); }
-.memo-form {
-  display: none; background: var(--card-bg); border-radius: 8px;
-  padding: 8px; margin: 0 8px 8px;
+.kulms-assign-badge.not-submitted { background: #ffebee; color: #c62828; }
+.kulms-assign-badge.submitted { background: #e8f5e9; color: #2e7d32; }
+.kulms-assign-badge.graded { background: #e3f2fd; color: #1565c0; }
+@media (prefers-color-scheme: dark) {
+  .kulms-assign-badge.not-submitted { background: #3d1c1c; color: #ef9a9a; }
+  .kulms-assign-badge.submitted { background: #1c3d1e; color: #a5d6a7; }
+  .kulms-assign-badge.graded { background: #1c2040; color: #90b0f0; }
 }
-.memo-form.open { display: block; }
-.memo-input {
+
+.kulms-badge-quiz {
+  background: #f3e5f5; color: #7b1fa2;
+  font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600;
+}
+.kulms-badge-resubmit {
+  padding: 1px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 600;
+  background: #fff3e0; color: #e65100;
+}
+.kulms-badge-no-resubmit {
+  padding: 1px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 600;
+  background: #fce4ec; color: #c62828;
+}
+.kulms-badge-memo {
+  display: inline-block; padding: 1px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 600;
+  background: #26a69a; color: #fff; align-self: flex-start;
+}
+
+.kulms-assign-card-name {
+  font-size: 12px; font-weight: 600; margin-bottom: 2px;
+  line-height: 1.3;
+}
+.kulms-assign-card-name a { color: var(--link); }
+.kulms-assign-card-name a:active { text-decoration: underline; }
+
+.kulms-assign-card-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text2); flex-wrap: wrap;
+}
+.kulms-time-remain { font-weight: 700; font-size: 11px; color: var(--text); }
+.kulms-time-remain.overdue { color: var(--kulms-color-danger); }
+
+.kulms-memo-text { font-size: 12px; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+.kulms-card-delete,
+.kulms-memo-delete {
+  position: absolute; top: 4px; right: 6px;
+  border: none; background: transparent; color: #bbb;
+  font-size: 14px; cursor: pointer; line-height: 1;
+  padding: 4px 6px; border-radius: 4px;
+}
+.kulms-card-delete:active,
+.kulms-memo-delete:active { color: var(--kulms-color-danger); background: rgba(232,85,85,0.1); }
+.kulms-card-delete-confirm {
+  font-size: 11px; color: #fff;
+  background: var(--kulms-color-danger);
+  padding: 3px 8px;
+}
+
+.kulms-deleted-restore {
+  position: absolute; top: 50%; right: 8px;
+  transform: translateY(-50%);
+  border: 1px solid #aaa; background: #fff;
+  color: #555; font-size: 11px; padding: 3px 10px;
+  border-radius: 4px; cursor: pointer;
+}
+.kulms-deleted-restore:active { background: #4caf50; color: #fff; border-color: #4caf50; }
+.kulms-deleted-notice {
+  font-size: 11px; color: #999; padding: 4px 8px; font-style: italic;
+}
+
+/* Memo FAB */
+.kulms-memo-btn {
+  display: block; width: 44px; height: 44px;
+  border-radius: 50%; border: none; background: #26a69a;
+  color: #fff; font-size: 24px; cursor: pointer;
+  margin: 12px auto; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  line-height: 1;
+}
+.kulms-memo-btn:active { background: #1f8d82; }
+
+/* Empty / Loading */
+.kulms-assign-empty {
+  padding: 40px 16px; text-align: center;
+  font-size: 13px; color: #999;
+}
+.kulms-assign-loading {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 40px 16px; gap: 12px;
+}
+.kulms-assign-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid #e0e0e0; border-top-color: #4a6fa5;
+  border-radius: 50%; animation: kulms-spin 0.8s linear infinite;
+}
+@keyframes kulms-spin { to { transform: rotate(360deg); } }
+.kulms-assign-loading-text { font-size: 13px; color: #888; }
+
+/* Memo modal */
+.kulms-memo-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 999999;
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 48px 16px 0;
+}
+.kulms-memo-modal-overlay.open { display: flex; }
+.kulms-memo-modal {
+  background: var(--card-bg);
+  border-radius: 14px; padding: 16px;
+  width: 100%; max-width: 480px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+}
+.kulms-memo-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.kulms-memo-modal-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.kulms-memo-modal-close {
+  border: none; background: transparent; font-size: 22px; color: #999;
+  cursor: pointer; width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+}
+.kulms-memo-input {
   width: 100%; border: 1px solid #ccc; border-radius: 6px;
-  padding: 6px 8px; font-size: 12px; resize: vertical; min-height: 60px;
+  padding: 8px; font-size: 14px; resize: vertical; min-height: 80px;
   font-family: inherit; background: var(--body-bg); color: var(--text);
 }
-.memo-btns { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
-.memo-btns button {
-  padding: 4px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;
-  border: none; -webkit-tap-highlight-color: transparent;
+.kulms-memo-dt-row {
+  display: flex; gap: 6px; margin-top: 10px;
 }
-.memo-cancel { background: #e0e0e0; color: #333; }
-.memo-save { background: var(--memo-color); color: #fff; }
+.kulms-memo-dt-sel {
+  flex: 1; min-width: 0;
+  border: 1px solid #ccc; border-radius: 6px;
+  padding: 8px 4px; font-size: 13px;
+  background: var(--body-bg); color: var(--text);
+}
+.kulms-memo-form-actions {
+  display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end;
+}
+.kulms-memo-cancel,
+.kulms-memo-save {
+  padding: 8px 16px; border: 1px solid #ccc; border-radius: 6px;
+  font-size: 13px; cursor: pointer;
+}
+.kulms-memo-cancel { background: #f5f5f5; color: #666; }
+.kulms-memo-save { background: #26a69a; color: #fff; border-color: #26a69a; }
 
-/* Memo Card */
-.a-card.memo-card { border-color: var(--memo-color); flex-direction: column; gap: 4px; }
-.memo-text { font-size: 12px; color: var(--text); white-space: pre-wrap; word-break: break-word; }
-.memo-del {
-  position: absolute; top: 4px; right: 6px; font-size: 16px;
-  color: #999; cursor: pointer; background: none; border: none;
-  -webkit-tap-highlight-color: transparent;
+/* ========== Settings ========== */
+.kulms-settings-view { padding: 4px 0; }
+.kulms-settings-card {
+  background: var(--row-bg); border-radius: 8px;
+  margin: 6px 8px; overflow: hidden;
 }
-.memo-del:active { color: var(--danger); }
-
-/* ===== Textbook ===== */
-.tb-note { padding: 8px 12px; font-size: 11px; color: #999; }
-.tb-ch {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 13px; font-weight: 600; color: #444;
-  padding: 8px; margin: 0 8px; background: #f5f5f5;
-  border-radius: 6px; cursor: pointer; user-select: none;
-  -webkit-tap-highlight-color: transparent;
+.kulms-settings-section-header {
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  user-select: none; font-size: 11px; font-weight: 700;
+  color: #888; text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 12px 12px 4px;
 }
-@media (prefers-color-scheme: dark) { .tb-ch { background: #333; color: #ddd; } }
-.tb-ch .arr { font-size: 10px; transition: transform 0.2s; display: inline-block; }
-.tb-ch .arr.shut { transform: rotate(-90deg); }
-.tb-cnt { font-weight: 400; color: #999; font-size: 12px; }
-.tb-syl {
-  font-size: 10px; font-weight: 600; color: var(--syl-color);
-  background: var(--syl-bg); padding: 2px 8px; border-radius: 4px; margin-left: auto;
-}
-.tb-items { overflow: hidden; transition: max-height 0.3s; }
-.tb-items.shut { max-height: 0 !important; padding: 0; }
-.tb-label { font-size: 11px; font-weight: 600; color: #888; padding: 6px 20px 2px; }
-.tb-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 10px 8px 20px; border-bottom: 1px solid #f0f0f0; margin: 0 8px;
-}
-@media (prefers-color-scheme: dark) { .tb-item { border-bottom-color: #3a3a3a; } }
-.tb-title { flex: 1; min-width: 0; }
-.tb-tt { font-size: 12px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tb-tm { font-size: 10px; color: #999; }
-.tb-amz {
-  font-size: 10px; font-weight: 600; color: #fff; background: var(--amazon);
-  padding: 3px 8px; border-radius: 4px; flex-shrink: 0; cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.tb-amz:active { opacity: 0.7; }
-
-/* ===== Settings ===== */
-.st-card { background: #f8f9fb; border-radius: 8px; margin: 6px 8px; overflow: hidden; }
-@media (prefers-color-scheme: dark) { .st-card { background: #2a2a2a; } }
-.st-sec-hd {
-  font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase;
-  padding: 12px 12px 4px; cursor: pointer; display: flex; align-items: center; gap: 6px;
-  user-select: none; -webkit-tap-highlight-color: transparent;
-}
-.st-sec-hd .arr { font-size: 10px; transition: transform 0.2s; display: inline-block; }
-.st-sec-hd .arr.shut { transform: rotate(-90deg); }
-.st-rows { overflow: hidden; transition: max-height 0.3s; }
-.st-rows.shut { max-height: 0 !important; }
-.st-row {
+.kulms-settings-chevron { font-size: 10px; transition: transform 0.2s; }
+.kulms-settings-chevron.collapsed { transform: rotate(-90deg); }
+.kulms-settings-card-body { display: block; }
+.kulms-settings-card-body.collapsed { display: none; }
+.kulms-settings-row {
   display: flex; align-items: center; gap: 12px;
-  padding: 10px 12px; border-bottom: 1px solid #f0f0f0;
+  padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,0.06);
 }
-@media (prefers-color-scheme: dark) { .st-row { border-bottom-color: #3a3a3a; } }
-.st-row:last-child { border-bottom: none; }
-.st-info { flex: 1; min-width: 0; }
-.st-lbl { font-size: 13px; font-weight: 600; color: var(--text); }
-.st-desc { font-size: 10px; color: #999; margin-top: 1px; }
-.st-ii { font-size: 11px; color: #bbb; margin-left: 3px; }
+.kulms-settings-row:last-child { border-bottom: none; }
+@media (prefers-color-scheme: dark) {
+  .kulms-settings-row { border-bottom-color: #3a3a3a; }
+}
+.kulms-settings-row-text { flex: 1; min-width: 0; }
+.kulms-settings-row-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.kulms-settings-row-desc { font-size: 11px; color: #999; margin-top: 1px; }
+.kulms-settings-info-icon { font-size: 12px; color: #aaa; cursor: pointer; margin-left: 3px; }
+.kulms-settings-desc { display: none; font-size: 11px; color: #888; padding: 4px 0 2px; }
+.kulms-settings-desc.open { display: block; }
 
 /* Toggle */
-.tgl {
-  width: 40px; height: 22px; border-radius: 11px;
-  background: #ccc; position: relative; cursor: pointer;
-  transition: background 0.2s; flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
+.kulms-toggle {
+  position: relative; display: inline-block;
+  width: 40px; height: 22px; flex-shrink: 0; cursor: pointer;
 }
-.tgl.on { background: var(--toggle-on); }
-.tgl::after {
-  content: ''; width: 18px; height: 18px; border-radius: 50%;
-  background: #fff; position: absolute; top: 2px; left: 2px;
+.kulms-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.kulms-toggle-slider {
+  position: absolute; inset: 0;
+  background: #ccc; border-radius: 11px;
+  transition: background 0.2s;
+}
+.kulms-toggle-slider::before {
+  content: ""; position: absolute; width: 18px; height: 18px;
+  left: 2px; bottom: 2px; background: #fff; border-radius: 50%;
   transition: transform 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
-.tgl.on::after { transform: translateX(18px); }
+.kulms-toggle input:checked + .kulms-toggle-slider { background: #4a6fa5; }
+.kulms-toggle input:checked + .kulms-toggle-slider::before { transform: translateX(18px); }
 
-.st-lang {
-  font-size: 11px; color: #666; background: #f0f0f0;
-  padding: 3px 8px; border-radius: 4px;
+/* Number / Select / Color */
+.kulms-settings-number {
+  width: 56px; padding: 4px 6px;
+  font-size: 13px; text-align: center;
+  border: 1px solid #ccc; border-radius: 4px;
+  background: var(--body-bg); color: var(--text);
 }
-@media (prefers-color-scheme: dark) { .st-lang { background: #444; color: #ccc; } }
+.kulms-settings-select {
+  padding: 4px 8px; font-size: 13px;
+  border: 1px solid #ccc; border-radius: 4px;
+  background: var(--body-bg); color: var(--text);
+  max-width: 140px;
+}
+.kulms-settings-color {
+  width: 36px; height: 28px;
+  border: 1px solid #ccc; border-radius: 4px;
+  cursor: pointer; padding: 0;
+}
 
-/* Footer */
-.lms-footer {
-  padding: 16px; font-size: 10px; color: #999;
-  text-align: center; border-top: 1px solid var(--border);
+.kulms-settings-btn-row {
+  display: flex; gap: 8px; padding: 10px 12px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+.kulms-settings-btn {
+  flex: 1; padding: 6px 4px; font-size: 12px;
+  border: 1px solid #ccc; border-radius: 4px;
+  background: #f8f8f8; color: #333; cursor: pointer;
+}
+.kulms-settings-btn:active { background: #eee; }
+@media (prefers-color-scheme: dark) {
+  .kulms-settings-btn { background: #333; color: #ccc; border-color: #555; }
+  .kulms-settings-btn:active { background: #444; }
+}
+
+.kulms-feedback-link {
+  display: block; text-align: center;
+  padding: 10px 16px; background: #f0f4ff;
+  color: #4a6fa5; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  margin: 6px 12px; text-decoration: none;
+}
+.kulms-feedback-link:active { background: #e0e8f5; }
+@media (prefers-color-scheme: dark) {
+  .kulms-feedback-link { background: #2a3548; color: #8ab4f8; }
+}
+
+.kulms-settings-footer {
+  padding: 16px 12px; font-size: 11px; color: #aaa; text-align: center;
+}
+
+/* ========== Textbooks ========== */
+.kulms-textbook-note {
+  font-size: 11px; color: #999;
+  padding: 6px 10px 10px; line-height: 1.4;
+}
+.kulms-textbook-course { margin-bottom: 6px; }
+.kulms-textbook-course-header {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: var(--text);
+  padding: 8px; margin: 0 8px;
+  background: var(--row-bg); border-radius: 6px;
+  cursor: pointer; user-select: none;
+}
+.kulms-textbook-course-toggle { font-size: 10px; transition: transform 0.2s; }
+.kulms-textbook-course-toggle.collapsed { transform: rotate(-90deg); }
+.kulms-textbook-course-name {
+  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.kulms-textbook-course-count { font-weight: 400; color: #999; font-size: 12px; }
+.kulms-textbook-course-badge {
+  font-size: 10px; font-weight: 400; color: #aaa;
+  background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 3px;
+}
+.kulms-textbook-syllabus {
+  font-size: 10px; font-weight: 600;
+  color: var(--syl-color); background: var(--syl-bg);
+  padding: 2px 8px; border-radius: 4px; margin-left: 4px;
+}
+.kulms-textbook-course-items { display: block; }
+.kulms-textbook-course-items.collapsed { display: none; }
+.kulms-textbook-group-label {
+  font-size: 11px; font-weight: 600; color: #888;
+  padding: 6px 10px 2px 16px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.kulms-textbook-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px 8px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  margin: 0 8px;
+}
+@media (prefers-color-scheme: dark) {
+  .kulms-textbook-item { border-bottom-color: #3a3a3a; }
+}
+.kulms-textbook-info { flex: 1; min-width: 0; }
+.kulms-textbook-title {
+  font-size: 13px; font-weight: 500; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.kulms-textbook-meta { font-size: 11px; color: #999; margin-top: 1px; }
+.kulms-textbook-amazon {
+  font-size: 11px; font-weight: 600; color: #fff;
+  background: #ff9900; padding: 4px 10px; border-radius: 4px;
+}
+.kulms-textbook-amazon:active { background: #e68a00; }
+
+/* Toast */
+.kulms-toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  background: #333; color: #fff;
+  font-size: 12px; padding: 8px 16px;
+  border-radius: 6px; z-index: 1000000;
+  animation: kulms-toast-fade 2.5s ease forwards;
+  white-space: nowrap;
+}
+@keyframes kulms-toast-fade {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; }
 }
 </style>
 </head>
 <body>
 
-<div class="demo-banner">Demo Mode</div>
+<div class="demo-banner" id="demoBanner">Demo Mode — All features are interactive with sample data</div>
 
-<!-- LMS Header -->
+<!-- LMS Header (Sakai-style) -->
 <div class="lms-header">
-  <div style="display:flex;align-items:center">
+  <div class="lms-logo-block">
+    <button class="kulms-hamburger-btn" id="sidebarToggleBtn2" title="Menu" aria-label="Menu">&#9776;</button>
     <div class="lms-logo">
       <span>KU</span><span class="ku-mark">&#127979;</span><span>LMS</span>
     </div>
-    <span class="lms-breadcrumb">&gt; Home</span>
+  </div>
+  <div class="lms-header-mid">
+    <span class="lms-breadcrumb" id="breadcrumbHome" style="cursor:pointer">ホーム</span>
+    <span id="breadcrumbCrumbs"></span>
+    <span class="lms-breadcrumb-sep">›</span>
+    <span class="lms-breadcrumb" id="breadcrumbCurrent">概要</span>
   </div>
   <div class="header-right">
-    <span class="header-icon">&#x1F514;</span>
-    <span class="header-icon">&#x1F50D;</span>
-    <button class="kulms-toggle-btn" onclick="togglePanel()">KULMS+</button>
+    <button class="kulms-hamburger-btn" id="kulms-assign-toggle" title="KULMS+">&#9776;</button>
   </div>
+</div>
+
+<!-- PA System alert banner (real KULMS shows these) -->
+<div class="lms-alert-banner" id="alertBanner">
+  <span class="ico">&#9888;</span>
+  <span id="alertText">【お知らせ】このアプリはKULMS+のデモモードです。実際のLMSデータは表示されていません。</span>
+  <button class="close" onclick="this.parentNode.style.display='none'">&times;</button>
 </div>
 
 <!-- Top Favbar -->
-<div class="top-favbar" id="favbar">
-  <span class="fav-item" style="border-left-color:#e85555" onclick="toggleDrop(this)">[Mon1]PowerElec.<span class="now-badge">NOW</span></span>
-  <span class="fav-item" style="border-left-color:#d7aa57" onclick="toggleDrop(this)">[Mon2]Electromag.2<span class="next-badge">NEXT</span></span>
-  <span class="fav-item" style="border-left-color:#62b665" onclick="toggleDrop(this)">[Mon3]AppliedPower</span>
-  <span class="fav-item" style="border-left-color:#8e24aa" onclick="toggleDrop(this)">[Mon4]ElecMachinery</span>
-  <span class="fav-item" style="border-left-color:#1976d2" onclick="toggleDrop(this)">[Tue2]Algo&amp;DS</span>
-  <span class="fav-item" style="border-left-color:#e85555" onclick="toggleDrop(this)">[Tue3]EM Circuits</span>
-  <span class="fav-item" style="border-left-color:#26a69a" onclick="toggleDrop(this)">[Wed1]Comm.Theory</span>
-  <span class="fav-item" style="border-left-color:#ff7043" onclick="toggleDrop(this)">[Wed2]SolidState</span>
-</div>
+<div class="kulms-top-favbar size-medium" id="topFavbar"></div>
 
 <!-- Sidebar Toggle -->
-<div class="sidebar-toggle-btn" onclick="toggleSidebar()">
+<div class="sidebar-toggle-btn" id="sidebarToggleBtn">
   <span class="arrow" id="sbArrow">&#9654;</span>
-  <span>Pinned Courses (8)</span>
+  <span id="sbLabel">ピン留め</span>
+  <span class="grid-ico">&#x25A6;</span>
 </div>
-<div class="lms-sidebar" id="lmsSidebar">
-  <div class="sb-item"><span class="sb-dot" style="background:#e85555"></span>[Mon1] Power Electronics<span class="sb-pin">&#x1F4CC;</span></div>
-  <div class="sb-item"><span class="sb-dot" style="background:#d7aa57"></span>[Mon2] Electromagnetics 2<span class="sb-pin">&#x1F4CC;</span></div>
-  <div class="sb-item"><span class="sb-dot" style="background:#62b665"></span>[Mon3] Applied Power Eng.<span class="sb-pin">&#x1F4CC;</span></div>
-  <div class="sb-item"><span class="sb-dot" style="background:#8e24aa"></span>[Mon4] Electric Machinery<span class="sb-pin">&#x1F4CC;</span></div>
-  <div class="sb-item"><span class="sb-dot" style="background:#1976d2"></span>[Tue2] Algorithms &amp; DS<span class="sb-pin">&#x1F4CC;</span></div>
-  <div class="sb-item"><span class="sb-dot" style="background:#e85555"></span>[Tue3] EM Circuits<span class="sb-pin">&#x1F4CC;</span></div>
-  <div class="sb-item"><span class="sb-dot" style="background:#26a69a"></span>[Wed1] Communication Theory<span class="sb-pin">&#x1F4CC;</span></div>
-  <div class="sb-item"><span class="sb-dot" style="background:#ff7043"></span>[Wed2] Solid State Elec.<span class="sb-pin">&#x1F4CC;</span></div>
-</div>
+<div class="lms-sidebar" id="lmsSidebar"></div>
 
-<!-- Main Content -->
-<div class="lms-page">
-  <div class="lms-section-title">Today's Messages</div>
-  <div class="lms-card">
-    <div class="lms-card-title">MATLAB Workshop (Online, 4/28)</div>
-    <div>Intro to MATLAB: data import, visualization, basic analysis.</div>
-    <div class="lms-card-meta">Apr 15, 2026</div>
-  </div>
-  <div class="lms-card">
-    <div class="lms-card-title">Turnitin Feedback Studio Workshop (4/27)</div>
-    <div>Plagiarism checking tool usage on KULMS.</div>
-    <div class="lms-card-meta">Apr 14, 2026</div>
-  </div>
-  <div class="lms-section-title" style="margin-top:12px">Recent Announcements</div>
-  <div class="lms-card">
-    <div class="lms-card-title">[Mon3] Applied Power Engineering</div>
-    <div>Report #1 deadline: Apr 20 22:00.</div>
-    <div class="lms-card-meta">Apr 18, 2026</div>
-  </div>
-  <div class="lms-card">
-    <div class="lms-card-title">[Mon1] Power Electronics</div>
-    <div>Week 4 lecture materials uploaded.</div>
-    <div class="lms-card-meta">Apr 16, 2026</div>
-  </div>
-  <div class="lms-card">
-    <div class="lms-card-title">[Tue2] Algorithms &amp; DS</div>
-    <div>Programming Exercise #3 released.</div>
-    <div class="lms-card-meta">Apr 15, 2026</div>
-  </div>
-</div>
+<!-- Main Content (Sakai portlet style; rendered dynamically by JS) -->
+<div class="lms-page" id="lmsPage"></div>
 <div class="lms-footer">Copyright 2026 Kyoto University. All Rights Reserved.</div>
 
 <!-- Panel Overlay -->
-<div class="panel-overlay" id="panelOverlay" onclick="togglePanel()"></div>
+<div class="panel-overlay" id="panelOverlay"></div>
 
 <!-- KULMS+ Panel -->
-<div class="kulms-panel" id="kulmsPanel">
-  <div class="p-header">
-    <div><span class="p-logo">KULMS+</span><span class="p-version">v2.0.2</span></div>
-    <div class="p-btns">
-      <button class="p-btn" onclick="refreshPanel()">&#x21BB;</button>
-      <button class="p-btn" onclick="togglePanel()">&#x2715;</button>
+<div id="kulms-assign-panel">
+  <div class="kulms-assign-header">
+    <span class="kulms-assign-logo">
+      KULMS+<span class="kulms-assign-version" id="panelVersion">v2.0.2</span>
+    </span>
+    <div class="kulms-assign-header-right">
+      <button class="kulms-assign-header-btn" id="refreshBtn" title="Refresh">&#x1F504;</button>
+      <button class="kulms-assign-close" id="closeBtn" title="Close">&times;</button>
     </div>
   </div>
-  <div class="p-tabs">
-    <div class="p-tab active" onclick="switchTab(0)">Assignments</div>
-    <div class="p-tab" onclick="switchTab(1)">Textbooks</div>
-    <div class="p-tab" onclick="switchTab(2)">Settings</div>
-  </div>
-  <div class="p-content">
+  <div class="kulms-panel-tab-bar" id="tabBar"></div>
+  <div class="kulms-assign-cache-info" id="cacheInfo"></div>
+  <div class="kulms-assign-content" id="panelContent"></div>
+</div>
 
-    <!-- Assignments -->
-    <div class="p-tc active" id="ptc0">
-      <div class="p-cache">Last updated: just now</div>
-
-      <div class="a-sec">
-        <div class="a-sec-hd sec-danger" onclick="togSec(this)"><span class="arr">&#x25BC;</span>Within 24 hours<span class="cnt">(1)</span></div>
-        <div class="a-cards">
-          <div class="a-card ud">
-            <div class="a-cb" onclick="togCb(this)"></div>
-            <div class="a-body">
-              <div><span class="a-pill" style="background:#62b665">[Mon3] Applied Power</span><span class="a-badge bg-notsub">Not Submitted</span></div>
-              <div class="a-name">Report #1 (4/13)</div>
-              <div class="a-meta"><span>2026/04/20 22:00</span><span class="a-time dng">2h 46m left</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="a-sec">
-        <div class="a-sec-hd sec-warning" onclick="togSec(this)"><span class="arr">&#x25BC;</span>Within 14 days<span class="cnt">(2)</span></div>
-        <div class="a-cards">
-          <div class="a-card uw">
-            <div class="a-cb" onclick="togCb(this)"></div>
-            <div class="a-body">
-              <div><span class="a-pill" style="background:#e85555">[Mon1] Power Elec.</span></div>
-              <div class="a-name">Report Assignment #2</div>
-              <div class="a-meta"><span>2026/05/01 23:59</span><span class="a-time">11d 4h left</span></div>
-            </div>
-          </div>
-          <div class="a-card uw">
-            <div class="a-cb" onclick="togCb(this)"></div>
-            <div class="a-body">
-              <div><span class="a-pill" style="background:#d7aa57">[Mon2] Electromag.2</span></div>
-              <div class="a-name">Problem Set #4</div>
-              <div class="a-meta"><span>2026/05/04 23:59</span><span class="a-time">14d left</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="a-sec">
-        <div class="a-sec-hd sec-success" onclick="togSec(this)"><span class="arr">&#x25BC;</span>30 days+<span class="cnt">(1)</span></div>
-        <div class="a-cards">
-          <div class="a-card us">
-            <div class="a-cb" onclick="togCb(this)"></div>
-            <div class="a-body">
-              <div><span class="a-pill" style="background:#1976d2">[Tue2] Algo&amp;DS</span><span class="a-badge bg-sub">Submitted</span></div>
-              <div class="a-name">Programming Exercise #3</div>
-              <div class="a-meta"><span>2026/05/25 23:59</span><span class="a-time">35d left</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="a-sec">
-        <div class="a-sec-hd sec-checked" onclick="togSec(this)"><span class="arr shut">&#x25BC;</span>Completed<span class="cnt">(3)</span></div>
-        <div class="a-cards shut">
-          <div class="a-card uc">
-            <div class="a-cb on" onclick="togCb(this)"></div>
-            <div class="a-body">
-              <div><span class="a-pill" style="background:#8e24aa">[Mon4] Elec.Machinery</span><span class="a-badge bg-graded">Graded</span></div>
-              <div class="a-name">Midterm Report</div>
-              <div class="a-meta"><span>2026/04/15 23:59</span></div>
-            </div>
-          </div>
-          <div class="a-card uc">
-            <div class="a-cb on" onclick="togCb(this)"></div>
-            <div class="a-body">
-              <div><span class="a-pill" style="background:#62b665">[Mon3] Applied Power</span><span class="a-badge bg-sub">Submitted</span></div>
-              <div class="a-name">Quiz #2</div>
-              <div class="a-meta"><span>2026/04/13 22:00</span></div>
-            </div>
-          </div>
-          <div class="a-card uc">
-            <div class="a-cb on" onclick="togCb(this)"></div>
-            <div class="a-body">
-              <div><span class="a-pill" style="background:#e85555">[Mon1] Power Elec.</span><span class="a-badge bg-graded">Graded</span></div>
-              <div class="a-name">Report Assignment #1</div>
-              <div class="a-meta"><span>2026/04/10 23:59</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Memo section -->
-      <div class="a-sec" id="memoSection">
-        <div class="a-sec-hd sec-memo" onclick="togSec(this)"><span class="arr">&#x25BC;</span>Memo<span class="cnt" id="memoCnt">(0)</span></div>
-        <div class="a-cards" id="memoCards"></div>
-      </div>
-
-      <div class="memo-form" id="memoForm">
-        <textarea class="memo-input" id="memoInput" placeholder="Write a memo..."></textarea>
-        <div class="memo-btns">
-          <button class="memo-cancel" onclick="closeMemo()">Cancel</button>
-          <button class="memo-save" onclick="saveMemo()">Save</button>
-        </div>
-      </div>
-      <button class="memo-fab" id="memoFab" onclick="openMemo()">+</button>
+<!-- Memo Modal -->
+<div class="kulms-memo-modal-overlay" id="memoModal">
+  <div class="kulms-memo-modal">
+    <div class="kulms-memo-modal-header">
+      <span class="kulms-memo-modal-title" id="memoModalTitle">Add Memo</span>
+      <button class="kulms-memo-modal-close" id="memoModalClose">&times;</button>
     </div>
-
-    <!-- Textbooks -->
-    <div class="p-tc" id="ptc1">
-      <div class="tb-note">* Only courses in KULASIS syllabus are supported.</div>
-
-      <div class="tb-ch" onclick="togTb(this)"><span class="arr">&#x25BC;</span>[Mon1] Power Elec.<span class="tb-cnt">(4)</span><span class="tb-syl">Syllabus</span></div>
-      <div class="tb-items">
-        <div class="tb-label">Textbooks</div>
-        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Note-based lectures...</div></div><span class="tb-amz">Amazon</span></div>
-        <div class="tb-label">References</div>
-        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Ace Power Electronics...</div><div class="tb-tm">Hikihara et al. / Asakura, 2000</div></div><span class="tb-amz">Amazon</span></div>
-        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Basic Power Electronics</div><div class="tb-tm">Miyairi / Maruzen, 1989</div></div><span class="tb-amz">Amazon</span></div>
-        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Power Elec. for Engineers</div><div class="tb-tm">Hirota et al. / Morikita, 2013</div></div><span class="tb-amz">Amazon</span></div>
-      </div>
-
-      <div class="tb-ch" onclick="togTb(this)" style="margin-top:4px"><span class="arr">&#x25BC;</span>[Mon2] Electromagnetics 2<span class="tb-cnt">(1)</span><span class="tb-syl">Syllabus</span></div>
-      <div class="tb-items">
-        <div class="tb-label">Textbooks</div>
-        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Electromagnetics (Shimazaki)</div></div><span class="tb-amz">Amazon</span></div>
-      </div>
-
-      <div class="tb-ch" onclick="togTb(this)" style="margin-top:4px"><span class="arr">&#x25BC;</span>[Mon3] Applied Power<span class="tb-cnt">(2)</span><span class="tb-syl">Syllabus</span></div>
-      <div class="tb-items">
-        <div class="tb-label">Textbooks</div>
-        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Electric Power Systems</div><div class="tb-tm">Ohmsha, 2018</div></div><span class="tb-amz">Amazon</span></div>
-        <div class="tb-label">References</div>
-        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Power System Engineering</div><div class="tb-tm">Mohan, Wiley, 2012</div></div><span class="tb-amz">Amazon</span></div>
-      </div>
-
-      <div class="tb-ch" onclick="togTb(this)" style="margin-top:4px"><span class="arr shut">&#x25BC;</span>[Tue2] Algo &amp; DS<span class="tb-cnt">(1)</span><span class="tb-syl">Syllabus</span></div>
-      <div class="tb-items shut">
-        <div class="tb-label">Textbooks</div>
-        <div class="tb-item"><div class="tb-title"><div class="tb-tt">Introduction to Algorithms</div><div class="tb-tm">Cormen et al. / MIT Press</div></div><span class="tb-amz">Amazon</span></div>
-      </div>
+    <textarea class="kulms-memo-input" id="memoInput" placeholder="Enter a memo..."></textarea>
+    <select class="kulms-memo-dt-sel" id="memoCourseSel" style="margin-top:10px">
+      <option value="">Select course (optional)</option>
+    </select>
+    <div class="kulms-memo-dt-row">
+      <select class="kulms-memo-dt-sel" id="memoYear"></select>
+      <select class="kulms-memo-dt-sel" id="memoMonth"></select>
+      <select class="kulms-memo-dt-sel" id="memoDay"></select>
+      <select class="kulms-memo-dt-sel" id="memoHour"></select>
+      <select class="kulms-memo-dt-sel" id="memoMin"></select>
     </div>
-
-    <!-- Settings -->
-    <div class="p-tc" id="ptc2">
-      <div class="st-card">
-        <div class="st-sec-hd" onclick="togSt(this)"><span class="arr">&#x25BC;</span>Appearance</div>
-        <div class="st-rows">
-          <div class="st-row">
-            <div class="st-info"><div class="st-lbl">Language<span class="st-ii">&#x24D8;</span></div><div class="st-desc">UI display language</div></div>
-            <span class="st-lang">Auto (Browser)</span>
-          </div>
-        </div>
-      </div>
-      <div class="st-card">
-        <div class="st-sec-hd" onclick="togSt(this)"><span class="arr">&#x25BC;</span>Panel</div>
-        <div class="st-rows">
-          <div class="st-row"><div class="st-info"><div class="st-lbl">Textbook Panel<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-          <div class="st-row"><div class="st-info"><div class="st-lbl">Memo Feature<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-          <div class="st-row"><div class="st-info"><div class="st-lbl">Push Display<span class="st-ii">&#x24D8;</span></div></div><div class="tgl" onclick="this.classList.toggle('on')"></div></div>
-        </div>
-      </div>
-      <div class="st-card">
-        <div class="st-sec-hd" onclick="togSt(this)"><span class="arr">&#x25BC;</span>Sidebar</div>
-        <div class="st-rows">
-          <div class="st-row"><div class="st-info"><div class="st-lbl">Course Tab Colors<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-          <div class="st-row"><div class="st-info"><div class="st-lbl">Assignment Badge<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-          <div class="st-row"><div class="st-info"><div class="st-lbl">Course Name Cleanup<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-          <div class="st-row"><div class="st-info"><div class="st-lbl">Pin Sort<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-          <div class="st-row"><div class="st-info"><div class="st-lbl">Course Click Expand<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-          <div class="st-row"><div class="st-info"><div class="st-lbl">Tool Visibility<span class="st-ii">&#x24D8;</span></div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-        </div>
-      </div>
+    <div class="kulms-memo-form-actions">
+      <button class="kulms-memo-cancel" id="memoCancelBtn">Cancel</button>
+      <button class="kulms-memo-save" id="memoSaveBtn">Save</button>
     </div>
   </div>
 </div>
 
 <script>
-/* Panel toggle */
-function togglePanel() {
-  document.getElementById('kulmsPanel').classList.toggle('open');
-  document.getElementById('panelOverlay').classList.toggle('open');
-}
+"use strict";
+(function () {
+  // ============== i18n ==============
+  var MSGS = {
+    en: {
+      panelTitle: "KULMS+",
+      tabAssignments: "Tasks", tabTextbooks: "Textbooks", tabSettings: "Settings",
+      sectionOverdue: "Overdue",
+      sectionDanger: "Within $1h",
+      sectionWarning: "Within $1d",
+      sectionSuccess: "Within $1d",
+      sectionOther: "Other",
+      sectionCompleted: "Completed",
+      sectionMemo: "Memos",
+      sectionDeleted: "Deleted",
+      remainDaysHoursMins: "$1d $2h $3m left",
+      remainHoursMins: "$1h $2m left",
+      remainMins: "$1m left",
+      expired: "Expired",
+      resubmitPeriod: "Resubmit period",
+      statusSubmitted: "Submitted", statusGraded: "Graded", statusNotSubmitted: "Not submitted",
+      refresh: "Refresh", close: "Close",
+      noAssignments: "No assignments",
+      lastUpdatedNow: "Last updated: just now",
+      lastUpdatedMins: "Last updated: $1m ago",
+      badgeQuiz: "Quiz", badgeResubmit: "Resubmit", badgeNoResubmit: "No resubmit",
+      memoPlaceholder: "Enter a memo...", memoCourseSelect: "Select course (optional)",
+      memoSave: "Save", memoCancel: "Cancel", memoAdd: "Add Memo", memoLabel: "Memo",
+      autoDeleteNotice: "Auto-deleted after 30 days", restoreItem: "Restore",
+      todayMessages: "Today's Messages", recentAnnouncements: "Recent Announcements",
+      resourcesTitle: "Resources (Sample folder tree)",
+      pinnedCoursesLabel: "Pinned Courses",
+      sectionAppearance: "Appearance",
+      sectionPanel: "Panel",
+      sectionAssignmentUpdates: "Assignment Updates",
+      sectionUrgency: "Urgency Customization",
+      sectionSidebar: "Sidebar",
+      sectionTopFavbar: "Top Bar",
+      sectionCoursePage: "Course Page",
+      featTextbooks: "Textbook Panel", featTextbooksDesc: "Fetch textbook info from syllabus",
+      featTabColoring: "Tab Coloring", featTabColoringDesc: "Color-code courses by deadline urgency",
+      settingsTabColorStyle: "Coloring Style",
+      settingsTopFavbarSize: "Top Bar Size",
+      featTopFavbar: "Top Pinned Bar", featTopFavbarDesc: "Show pinned courses as a horizontal bar",
+      featNotificationBadge: "New Assignment Badge", featNotificationBadgeDesc: "Show badge on courses with new assignments",
+      featCurrentPeriod: "Current Class Highlight", featCurrentPeriodDesc: "Show NOW badge on the current class",
+      featMemos: "Memos", featMemosDesc: "Add and save memos in the task tab",
+      featPanelPush: "Panel Push", featPanelPushDesc: "Push page aside when panel opens",
+      featAutoComplete: "Auto-complete Detection", featAutoCompleteDesc: "Auto-classify submitted/graded as completed",
+      featFolderExpand: "Folder Expand", featFolderExpandDesc: "Expand/collapse folders without reload",
+      featAutoExpandAll: "Auto Expand All", featAutoExpandAllDesc: "Auto-expand all folders when opening resources",
+      featHideResourceColumns: "Hide extra columns", featHideResourceColumnsDesc: "Hide access, creator, modified, size",
+      featCourseNameCleanup: "Course Name Cleanup", featCourseNameCleanupDesc: "Shorten course names by omitting year/semester",
+      featPinSort: "Pin Sort", featPinSortDesc: "Auto-sort by day/period",
+      featCourseRowClick: "Course Row Click", featCourseRowClickDesc: "Make entire sidebar course row clickable",
+      featToolVisibility: "Tool Visibility", featToolVisibilityDesc: "Collapse unused tools into Other",
+      featSidebarResize: "Sidebar Resize", featSidebarResizeDesc: "Drag to adjust sidebar width",
+      featSidebarStyle: "Sidebar Style", featSidebarStyleDesc: "Replace blue selection background with left border",
+      settingsAutoRefresh: "Auto-refresh Interval", settingsAutoRefreshDesc: "Interval to auto-fetch (seconds)",
+      settingsDangerHours: "Urgent (hours)", settingsDangerHoursDesc: "Show within this many hours as urgent",
+      settingsWarningDays: "Warning (days)", settingsWarningDaysDesc: "Within this many days as warning",
+      settingsSuccessDays: "Comfortable (days)", settingsSuccessDaysDesc: "Within this many days as comfortable",
+      settingsColorDanger: "Urgent Color", settingsColorWarning: "Warning Color",
+      settingsColorSuccess: "Comfortable Color", settingsColorOther: "Other Color",
+      settingsLanguage: "Language", settingsLanguageDesc: "UI display language",
+      langAuto: "Auto (browser setting)",
+      tabColorStyleBorder: "Border", tabColorStyleBackground: "Background", tabColorStyleBold: "Bold Bar + BG",
+      sizeSmall: "Small", sizeMedium: "Medium", sizeLarge: "Large", sizeXLarge: "Extra Large",
+      btnDefaults: "Reset to Defaults", btnAllOn: "All ON", btnAllOff: "All OFF",
+      settingsFooter: "Changes apply after page reload",
+      feedbackLink: "📬 Send Feedback",
+      saveOk: "Saved", restoreOk: "Restored", deleteConfirm: "Delete?",
+      demoBanner: "Demo Mode — All features are interactive with sample data"
+    },
+    ja: {
+      panelTitle: "KULMS+",
+      tabAssignments: "課題", tabTextbooks: "教科書", tabSettings: "設定",
+      sectionOverdue: "期限切れ",
+      sectionDanger: "$1時間以内",
+      sectionWarning: "$1日以内",
+      sectionSuccess: "$1日以内",
+      sectionOther: "その他",
+      sectionCompleted: "完了",
+      sectionMemo: "メモ",
+      sectionDeleted: "削除済み",
+      remainDaysHoursMins: "残り $1日 $2時間 $3分",
+      remainHoursMins: "残り $1時間 $2分",
+      remainMins: "残り $1分",
+      expired: "期限切れ",
+      resubmitPeriod: "再提出受付中",
+      statusSubmitted: "提出済", statusGraded: "評定済", statusNotSubmitted: "未提出",
+      refresh: "更新", close: "閉じる",
+      noAssignments: "課題はありません",
+      lastUpdatedNow: "最終更新：たった今",
+      lastUpdatedMins: "最終更新：$1分前",
+      badgeQuiz: "クイズ", badgeResubmit: "再提出受付中", badgeNoResubmit: "再提出不可",
+      memoPlaceholder: "メモを入力...", memoCourseSelect: "授業を選択（任意）",
+      memoSave: "保存", memoCancel: "キャンセル", memoAdd: "メモ追加", memoLabel: "メモ",
+      autoDeleteNotice: "30日後に自動削除されます", restoreItem: "復元",
+      todayMessages: "今日のメッセージ", recentAnnouncements: "最近のお知らせ",
+      resourcesTitle: "授業資料（サンプル）",
+      pinnedCoursesLabel: "ピン留め授業",
+      sectionAppearance: "外観",
+      sectionPanel: "パネル",
+      sectionAssignmentUpdates: "課題更新検知",
+      sectionUrgency: "緊急度カスタマイズ",
+      sectionSidebar: "サイドバー",
+      sectionTopFavbar: "上部バー",
+      sectionCoursePage: "授業ページ",
+      featTextbooks: "教科書パネル", featTextbooksDesc: "シラバスから教科書情報を取得",
+      featTabColoring: "タブ色分け", featTabColoringDesc: "緊急度で授業タブを色分け",
+      settingsTabColorStyle: "色分けスタイル",
+      settingsTopFavbarSize: "上部バーサイズ",
+      featTopFavbar: "上部ピン留めバー", featTopFavbarDesc: "ヘッダー下にピン留め授業を横並び表示",
+      featNotificationBadge: "新着課題バッジ", featNotificationBadgeDesc: "新着課題のある授業にバッジ表示",
+      featCurrentPeriod: "現在の授業ハイライト", featCurrentPeriodDesc: "現在の時間割にNOWバッジ",
+      featMemos: "メモ", featMemosDesc: "課題タブでメモを追加",
+      featPanelPush: "パネル押し出し", featPanelPushDesc: "パネルを開いた時にページを押し出す",
+      featAutoComplete: "自動完了判定", featAutoCompleteDesc: "提出済/評定済を自動的に完了とする",
+      featFolderExpand: "フォルダ展開", featFolderExpandDesc: "リロード無しで開閉",
+      featAutoExpandAll: "全フォルダ自動展開", featAutoExpandAllDesc: "資料ページで全フォルダを展開",
+      featHideResourceColumns: "余分な列を非表示", featHideResourceColumnsDesc: "アクセス・作成者・更新・サイズ列を隠す",
+      featCourseNameCleanup: "授業名整理", featCourseNameCleanupDesc: "授業名から年度/学期を省略",
+      featPinSort: "ピン並び替え", featPinSortDesc: "曜日/時限で自動ソート",
+      featCourseRowClick: "授業行クリック", featCourseRowClickDesc: "サイドバー授業行全体をクリック可能に",
+      featToolVisibility: "ツール表示管理", featToolVisibilityDesc: "未使用ツールを「その他」に折り畳む",
+      featSidebarResize: "サイドバーリサイズ", featSidebarResizeDesc: "ドラッグで幅調整",
+      featSidebarStyle: "サイドバースタイル", featSidebarStyleDesc: "選択中の青背景を左ボーダーに置き換え",
+      settingsAutoRefresh: "自動更新間隔", settingsAutoRefreshDesc: "課題自動取得の間隔（秒）",
+      settingsDangerHours: "緊急 (時間)", settingsDangerHoursDesc: "この時間以内を緊急表示",
+      settingsWarningDays: "警告 (日)", settingsWarningDaysDesc: "この日数以内を警告表示",
+      settingsSuccessDays: "余裕 (日)", settingsSuccessDaysDesc: "この日数以内を余裕表示",
+      settingsColorDanger: "緊急色", settingsColorWarning: "警告色",
+      settingsColorSuccess: "余裕色", settingsColorOther: "その他色",
+      settingsLanguage: "言語", settingsLanguageDesc: "UI表示言語",
+      langAuto: "自動 (ブラウザ設定)",
+      tabColorStyleBorder: "ボーダー", tabColorStyleBackground: "背景", tabColorStyleBold: "太枠＋背景",
+      sizeSmall: "小", sizeMedium: "中", sizeLarge: "大", sizeXLarge: "特大",
+      btnDefaults: "デフォルトに戻す", btnAllOn: "全てON", btnAllOff: "全てOFF",
+      settingsFooter: "設定変更はリロード後に反映",
+      feedbackLink: "📬 フィードバックを送る",
+      saveOk: "保存しました", restoreOk: "復元しました", deleteConfirm: "削除しますか？",
+      demoBanner: "デモモード — 全機能をサンプルデータで体験できます"
+    }
+  };
 
-/* Refresh animation */
-function refreshPanel() {
-  var btn = event.currentTarget;
-  btn.style.transition = 'transform 0.5s';
-  btn.style.transform = 'rotate(360deg)';
-  setTimeout(function() { btn.style.transition = ''; btn.style.transform = ''; }, 500);
-  var ci = document.querySelector('.p-cache');
-  if (ci) ci.textContent = 'Last updated: just now';
-}
-
-/* Tabs */
-function switchTab(i) {
-  document.querySelectorAll('.p-tab').forEach(function(t,j) { t.classList.toggle('active', j===i); });
-  document.querySelectorAll('.p-tc').forEach(function(c,j) { c.classList.toggle('active', j===i); });
-}
-
-/* Assignment section toggle */
-function togSec(hd) {
-  var arr = hd.querySelector('.arr');
-  var cards = hd.nextElementSibling;
-  if (!cards) return;
-  arr.classList.toggle('shut');
-  cards.classList.toggle('shut');
-}
-
-/* Checkbox */
-function togCb(el) {
-  el.classList.toggle('on');
-  var card = el.closest('.a-card');
-  if (el.classList.contains('on')) {
-    card.classList.add('uc');
-  } else {
-    card.classList.remove('uc');
+  function detectLang() {
+    var s = state.settings;
+    var lang = s && s.language;
+    if (!lang || lang === "auto") {
+      var ui = (navigator.language || "en").toLowerCase();
+      lang = ui.indexOf("ja") === 0 ? "ja" : "en";
+    }
+    return lang;
   }
-}
+  function t(key, sub) {
+    var lang = detectLang();
+    var m = (MSGS[lang] && MSGS[lang][key]) || (MSGS.en[key]) || key;
+    if (sub != null) {
+      var arr = Array.isArray(sub) ? sub : [sub];
+      for (var i = 0; i < arr.length; i++) {
+        m = m.replace(new RegExp("\\$" + (i + 1), "g"), arr[i]);
+      }
+    }
+    return m;
+  }
 
-/* Sidebar */
-function toggleSidebar() {
-  document.getElementById('lmsSidebar').classList.toggle('open');
-  document.getElementById('sbArrow').classList.toggle('open');
-}
+  // ============== Storage ==============
+  var STORAGE_KEY = "kulms-demo-state-v1";
+  var DEFAULTS = {
+    settings: {
+      textbooks: true, tabColoring: true, tabColorStyle: "border",
+      folderExpand: true, autoExpandAll: false, hideResourceColumns: false,
+      courseNameCleanup: false, pinSort: false, courseRowClick: false,
+      toolVisibility: false, sidebarResize: false,
+      notificationBadge: true, sidebarStyle: false, memos: true,
+      panelPush: false, autoComplete: true, currentPeriodHighlight: true,
+      topFavbar: true, topFavbarSize: "medium",
+      fetchInterval: 120, dangerHours: 24, warningDays: 5, successDays: 14,
+      colorDanger: "#e85555", colorWarning: "#d7aa57",
+      colorSuccess: "#62b665", colorOther: "#777777",
+      language: "auto"
+    },
+    checked: {},
+    dismissed: {},
+    memos: [],
+    sectionCollapsed: {},
+    pins: {},
+    expandedCourse: null,
+    sidebarOpen: true,
+    panelOpen: false,
+    activeTab: "assignments",
+    currentView: { type: "home" }
+  };
 
-/* Favbar dropdown */
-var dropTpl = ['Overview','Assignments','Resources','Gradebook','Forums'];
-function toggleDrop(el) {
-  var existing = el.querySelector('.fav-dropdown');
-  // Close all others
-  document.querySelectorAll('.fav-dropdown.open').forEach(function(d) { d.classList.remove('open'); d.parentElement.classList.remove('open'); });
-  if (existing) {
-    el.classList.toggle('open');
-    existing.classList.toggle('open');
-  } else {
-    var dd = document.createElement('div');
-    dd.className = 'fav-dropdown open';
-    dropTpl.forEach(function(t) {
-      var a = document.createElement('span');
-      a.className = 'fav-dropdown-item';
-      a.textContent = t;
+  var state = loadState();
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return JSON.parse(JSON.stringify(DEFAULTS));
+      var s = JSON.parse(raw);
+      // merge defaults
+      s.settings = Object.assign({}, DEFAULTS.settings, s.settings || {});
+      s.checked = s.checked || {};
+      s.dismissed = s.dismissed || {};
+      s.memos = s.memos || [];
+      s.sectionCollapsed = s.sectionCollapsed || {};
+      s.pins = s.pins || {};
+      if (!s.currentView) s.currentView = { type: "home" };
+      return s;
+    } catch (e) {
+      return JSON.parse(JSON.stringify(DEFAULTS));
+    }
+  }
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  // ============== Mock Data ==============
+  // Today: simulate as 2026-04-20 19:14 (JST). 'NOW' calculated relative to real current time too.
+  var NOW = Date.now();
+  var DAY = 86400000, HOUR = 3600000, MIN = 60000;
+
+  var COURSES = [
+    { id: "c-mon1", short: "[月1]", name: "パワーエレクトロニクス",     nameEn: "Power Electronics",      day: 1, period: 1, color: "#e85555", pinned: true,  hasNewAssign: true,  hasSyllabus: true,  textbooks: [
+        { type: "textbook",  title: "ノート式講義 パワーエレクトロニクス", author: "" },
+        { type: "reference", title: "エース パワーエレクトロニクス", author: "引原他", publisher: "朝倉書店, 2000", isbn: "9784254220483" },
+        { type: "reference", title: "基礎パワーエレクトロニクス", author: "宮入", publisher: "丸善, 1989", isbn: "9784621034453" },
+        { type: "reference", title: "技術者のためのパワーエレクトロニクス", author: "広田他", publisher: "森北出版, 2013", isbn: "9784627747319" }
+    ] },
+    { id: "c-mon2", short: "[月2]", name: "電磁気学2",                 nameEn: "Electromagnetics 2",     day: 1, period: 2, color: "#d7aa57", pinned: true,  hasNewAssign: false, hasSyllabus: true, textbooks: [
+        { type: "textbook", title: "電磁気学", author: "島崎", publisher: "岩波書店, 2005", isbn: "9784000061421" }
+    ] },
+    { id: "c-mon3", short: "[月3]", name: "応用電力工学",               nameEn: "Applied Power Engineering", day: 1, period: 3, color: "#62b665", pinned: true,  hasNewAssign: true,  hasSyllabus: true, textbooks: [
+        { type: "textbook",  title: "電力系統工学", author: "", publisher: "オーム社, 2018", isbn: "9784274222566" },
+        { type: "reference", title: "Power System Engineering", author: "Mohan", publisher: "Wiley, 2012", isbn: "9780470444016" }
+    ] },
+    { id: "c-mon4", short: "[月4]", name: "電気機器基礎論",             nameEn: "Electric Machinery",     day: 1, period: 4, color: "#8e24aa", pinned: true,  hasNewAssign: false, hasSyllabus: true, textbooks: [] },
+    { id: "c-tue2", short: "[火2]", name: "アルゴリズムとデータ構造",   nameEn: "Algorithms & DS",        day: 2, period: 2, color: "#1976d2", pinned: true,  hasNewAssign: true,  hasSyllabus: true, textbooks: [
+        { type: "textbook", title: "アルゴリズムイントロダクション", author: "Cormen他", publisher: "MIT Press, 2009", isbn: "9780262033848" }
+    ] },
+    { id: "c-tue3", short: "[火3]", name: "電気電磁回路",               nameEn: "EM Circuits",            day: 2, period: 3, color: "#e85555", pinned: true,  hasNewAssign: false, hasSyllabus: false, textbooks: [] },
+    { id: "c-wed1", short: "[水1]", name: "通信基礎論",                 nameEn: "Communication Theory",   day: 3, period: 1, color: "#26a69a", pinned: true,  hasNewAssign: false, hasSyllabus: true, textbooks: [
+        { type: "textbook", title: "通信システム", author: "Haykin", publisher: "Wiley, 2009", isbn: "9780471697909" }
+    ] },
+    { id: "c-wed2", short: "[水2]", name: "固体電子工学",               nameEn: "Solid State Electronics",day: 3, period: 2, color: "#ff7043", pinned: true,  hasNewAssign: false, hasSyllabus: true, textbooks: [] },
+    { id: "c-thu1", short: "[木1]", name: "線形代数学B",                nameEn: "Linear Algebra B",       day: 4, period: 1, color: "#5e35b1", pinned: false, hasNewAssign: false, hasSyllabus: true, textbooks: [
+        { type: "textbook", title: "線形代数の基礎", author: "Axler", publisher: "Springer, 2015", isbn: "9783319110790" }
+    ] },
+    { id: "c-fri2", short: "[金2]", name: "量子力学",                   nameEn: "Quantum Mechanics",      day: 5, period: 2, color: "#00897b", pinned: false, hasNewAssign: false, hasSyllabus: true, textbooks: [] }
+  ];
+
+  // Assignments: span all urgency tiers + completed + memo + dismissed examples
+  // names: { ja, en }; courseName generated dynamically based on language
+  var ASSIGNMENTS = [
+    { entityId: "a1", courseId: "c-mon3", names: { ja: "レポート#1（4/13講義分）", en: "Report #1 (4/13 lecture)" },
+      deadline: NOW + 2 * HOUR + 46 * MIN, type: "assignment", status: "" },
+    { entityId: "a2", courseId: "c-mon1", names: { ja: "レポート課題#2", en: "Report Assignment #2" },
+      deadline: NOW + 11 * DAY + 4 * HOUR, type: "assignment", status: "" },
+    { entityId: "a3", courseId: "c-mon2", names: { ja: "演習問題#4", en: "Problem Set #4" },
+      deadline: NOW + 14 * DAY, type: "assignment", status: "" },
+    { entityId: "a4", courseId: "c-tue2", names: { ja: "プログラミング演習#3", en: "Programming Exercise #3" },
+      deadline: NOW + 35 * DAY, type: "assignment", status: "提出済" },
+    { entityId: "a5", courseId: "c-wed1", names: { ja: "オンラインクイズ#1", en: "Quiz #1 (online)" },
+      deadline: NOW - 2 * HOUR, closeTime: NOW + 6 * HOUR, type: "quiz", status: "", allowResubmission: true },
+    { entityId: "a6", courseId: "c-mon4", names: { ja: "中間レポート", en: "Midterm Report" },
+      deadline: NOW - 5 * DAY, closeTime: NOW - 4 * DAY, type: "assignment", status: "評定済", grade: "A" },
+    { entityId: "a7", courseId: "c-mon3", names: { ja: "確認テスト#2", en: "Quiz #2" },
+      deadline: NOW - 7 * DAY, closeTime: NOW - 6 * DAY, type: "quiz", status: "提出済" },
+    { entityId: "a8", courseId: "c-mon1", names: { ja: "レポート課題#1", en: "Report Assignment #1" },
+      deadline: NOW - 10 * DAY, closeTime: NOW - 9 * DAY, type: "assignment", status: "評定済", grade: "B+" },
+    { entityId: "a9", courseId: "c-tue3", names: { ja: "実験レポート提出#1", en: "Lab Submission #1" },
+      deadline: NOW - 30 * MIN, type: "assignment", status: "", allowResubmission: false },
+    { entityId: "a10", courseId: "c-wed2", names: { ja: "アンケート（期限なし）", en: "Survey (no deadline)" },
+      deadline: 0, type: "assignment", status: "" }
+  ];
+
+  function courseNameFor(c) {
+    if (!c) return "";
+    return detectLang() === "ja" ? (c.short + " " + c.name) : (c.short + " " + c.nameEn);
+  }
+  function getCourseById(id) {
+    return COURSES.filter(function (c) { return c.id === id; })[0] || null;
+  }
+
+  // Tools shared across courses
+  var TOOLS = [
+    { id: "overview",  ja: "概要",      en: "Overview",    icon: "📋" },
+    { id: "resources", ja: "授業資料",  en: "Resources",   icon: "📁" },
+    { id: "assignments", ja: "課題",    en: "Assignments", icon: "📝" },
+    { id: "forums",    ja: "フォーラム", en: "Forums",     icon: "💬" },
+    { id: "gradebook", ja: "成績",      en: "Gradebook",   icon: "📊" },
+    { id: "syllabus",  ja: "シラバス",  en: "Syllabus",    icon: "ℹ️" }
+  ];
+  function toolLabel(id) {
+    var t = TOOLS.filter(function (x) { return x.id === id; })[0];
+    if (!t) return id;
+    return detectLang() === "ja" ? t.ja : t.en;
+  }
+  function assignName(a) {
+    if (a.names) return a.names[detectLang()] || a.names.en || a.names.ja;
+    return a.name;
+  }
+  function assignCourseName(a) {
+    var c = COURSES.filter(function (x) { return x.id === a.courseId; })[0];
+    return c ? courseNameFor(c) : "";
+  }
+
+  // ============== Utilities ==============
+  function escHtml(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];
+  }); }
+
+  function getUrgencyClass(deadline) {
+    if (!deadline) return "urgency-other";
+    var diff = deadline - Date.now();
+    if (diff < 0) return "urgency-overdue";
+    if (diff < state.settings.dangerHours * HOUR) return "urgency-danger";
+    if (diff < state.settings.warningDays * DAY) return "urgency-warning";
+    if (diff < state.settings.successDays * DAY) return "urgency-success";
+    return "urgency-other";
+  }
+  function urgencyToCsTab(u) {
+    if (u === "urgency-overdue" || u === "urgency-danger") return "cs-tab-danger";
+    if (u === "urgency-warning") return "cs-tab-warning";
+    if (u === "urgency-success") return "cs-tab-success";
+    return "cs-tab-other";
+  }
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function formatDeadline(ts) {
+    if (!ts) return "-";
+    var d = new Date(ts);
+    return d.getFullYear() + "/" + pad(d.getMonth() + 1) + "/" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+  function formatRemaining(deadline, closeTime) {
+    if (!deadline) return "";
+    var diff = deadline - Date.now();
+    if (diff < 0) {
+      if (closeTime && closeTime > Date.now()) return t("resubmitPeriod");
+      return t("expired");
+    }
+    var d = Math.floor(diff / DAY);
+    var h = Math.floor((diff % DAY) / HOUR);
+    var m = Math.floor((diff % HOUR) / MIN);
+    if (d > 0) return t("remainDaysHoursMins", [String(d), String(h), String(m)]);
+    if (h > 0) return t("remainHoursMins", [String(h), String(m)]);
+    return t("remainMins", [String(m)]);
+  }
+  function isSubmitted(status) {
+    if (!status) return false;
+    var s = status.toLowerCase();
+    return s.indexOf("提出済") >= 0 || s.indexOf("submitted") >= 0 || s.indexOf("評定済") >= 0 || s.indexOf("graded") >= 0;
+  }
+  function getCheckedKey(a) { return a.entityId || (a.courseId + ":" + a.name); }
+  function isChecked(a) {
+    var v = state.checked[getCheckedKey(a)];
+    return v && v !== "active";
+  }
+  function isExplicitlyActive(a) { return state.checked[getCheckedKey(a)] === "active"; }
+  function isDismissed(a) { return !!state.dismissed[getCheckedKey(a)]; }
+
+  function showToast(msg) {
+    var prev = document.querySelector(".kulms-toast");
+    if (prev) prev.remove();
+    var el = document.createElement("div");
+    el.className = "kulms-toast";
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.remove(); }, 2500);
+  }
+
+  // ============== Navigation ==============
+  function navigateTo(view) {
+    state.currentView = view || { type: "home" };
+    saveState();
+    renderMainPage();
+    updateBreadcrumb();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function updateBreadcrumb() {
+    var bc = document.getElementById("breadcrumbCurrent");
+    if (!bc) return;
+    var ja = detectLang() === "ja";
+    var v = state.currentView || { type: "home" };
+    if (v.type === "home") {
+      bc.textContent = ja ? "概要" : "Overview";
+      var crumbs = document.getElementById("breadcrumbCrumbs");
+      if (crumbs) crumbs.innerHTML = "";
+    } else if (v.type === "tool") {
+      var c = getCourseById(v.courseId);
+      var crumbs = document.getElementById("breadcrumbCrumbs");
+      if (crumbs) {
+        crumbs.innerHTML = '<span class="lms-breadcrumb-sep">›</span><span class="lms-breadcrumb">'
+          + escHtml(courseNameFor(c)) + '</span>';
+      }
+      bc.textContent = toolLabel(v.tool);
+    }
+  }
+
+  // ============== Apply settings to DOM ==============
+  function applySettings() {
+    var s = state.settings;
+    document.documentElement.style.setProperty("--kulms-color-danger", s.colorDanger);
+    document.documentElement.style.setProperty("--kulms-color-warning", s.colorWarning);
+    document.documentElement.style.setProperty("--kulms-color-success", s.colorSuccess);
+    document.documentElement.style.setProperty("--kulms-color-other", s.colorOther);
+
+    // Top favbar
+    var bar = document.getElementById("topFavbar");
+    bar.style.display = s.topFavbar ? "" : "none";
+    bar.className = "kulms-top-favbar size-" + s.topFavbarSize + " color-" + s.tabColorStyle;
+
+    // Sidebar tab coloring
+    var sb = document.getElementById("lmsSidebar");
+    sb.classList.remove("sidebar-color-border", "sidebar-color-background", "sidebar-color-bold");
+    if (s.tabColoring) sb.classList.add("sidebar-color-" + s.tabColorStyle);
+
+    // Demo banner localized
+    document.getElementById("demoBanner").textContent = t("demoBanner");
+
+    // Static labels (only those that still exist in DOM)
+    var sbLabel = document.getElementById("sbLabel");
+    if (sbLabel) sbLabel.textContent = t("pinnedCoursesLabel");
+    var rb = document.getElementById("refreshBtn");
+    if (rb) rb.title = t("refresh");
+    var cb = document.getElementById("closeBtn");
+    if (cb) cb.title = t("close");
+    var bcHome = document.getElementById("breadcrumbHome");
+    if (bcHome) bcHome.textContent = detectLang() === "ja" ? "ホーム" : "Home";
+    var at = document.getElementById("alertText");
+    if (at) at.textContent = detectLang() === "ja"
+      ? "【お知らせ】このアプリはKULMS+のデモモードです。実際のLMSデータは表示されていません。"
+      : "[Notice] This is the KULMS+ demo mode. Real LMS data is not displayed.";
+  }
+
+  // ============== Rendering: Top Favbar ==============
+  function getCurrentPeriodInfo() {
+    // Mock: pretend it's Monday period 1 if it's "now"; pick day-of-week to match real time
+    var now = new Date();
+    var dow = now.getDay(); // 0=Sun, 1=Mon, ...
+    var hh = now.getHours();
+    // Fall back to mock: NOW = Mon period 1 if dow is weekend
+    if (dow === 0 || dow === 6) return { nowDay: 1, nowPeriod: 1, nextDay: 1, nextPeriod: 2 };
+    // Map hour to period (rough): 8:45-10:15=1, 10:30-12:00=2, 13:00-14:30=3, 14:45-16:15=4, 16:30-18:00=5
+    var periodMap = [[8,1],[10,2],[13,3],[14,4],[16,5]];
+    var nowP = 0;
+    for (var i = periodMap.length - 1; i >= 0; i--) {
+      if (hh >= periodMap[i][0]) { nowP = periodMap[i][1]; break; }
+    }
+    if (nowP === 0) return { nowDay: 0, nowPeriod: 0, nextDay: dow, nextPeriod: 1 };
+    return { nowDay: dow, nowPeriod: nowP, nextDay: dow, nextPeriod: nowP + 1 };
+  }
+
+  function renderTopFavbar() {
+    var bar = document.getElementById("topFavbar");
+    bar.innerHTML = "";
+    var pinned = COURSES.filter(function (c) { return state.pins[c.id] !== false && c.pinned; });
+    if (state.settings.pinSort) {
+      pinned.sort(function (a, b) { return (a.day - b.day) || (a.period - b.period); });
+    }
+    var info = state.settings.currentPeriodHighlight ? getCurrentPeriodInfo() : null;
+    pinned.forEach(function (c) {
+      var item = document.createElement("span");
+      item.className = "kulms-top-favbar-item " + getCourseUrgencyClass(c);
+      item.dataset.courseId = c.id;
+
+      var nameSpan = document.createElement("span");
+      nameSpan.className = "kulms-top-favbar-name";
+      nameSpan.textContent = formatCourseName(c);
+      item.appendChild(nameSpan);
+
+      if (info) {
+        if (info.nowDay === c.day && info.nowPeriod === c.period) {
+          var nb = document.createElement("span");
+          nb.className = "kulms-now-badge";
+          nb.textContent = "NOW";
+          item.appendChild(nb);
+        } else if (info.nextDay === c.day && info.nextPeriod === c.period) {
+          var xb = document.createElement("span");
+          xb.className = "kulms-now-badge is-next";
+          xb.textContent = "NEXT";
+          item.appendChild(xb);
+        }
+      }
+      if (state.settings.notificationBadge && c.hasNewAssign) {
+        var dot = document.createElement("span");
+        dot.className = "kulms-notification-badge";
+        item.appendChild(dot);
+      }
+
+      item.addEventListener("click", function (e) {
+        e.stopPropagation();
+        toggleFavbarDropdown(item, c);
+      });
+      bar.appendChild(item);
+    });
+  }
+
+  var openDropdown = null;
+  function toggleFavbarDropdown(item, course) {
+    closeFavbarDropdown();
+    if (item.classList.contains("is-open")) {
+      item.classList.remove("is-open"); return;
+    }
+    item.classList.add("is-open");
+    var dd = document.createElement("div");
+    dd.className = "kulms-favbar-dropdown";
+    TOOLS.forEach(function (tool) {
+      var a = document.createElement("a");
+      a.className = "kulms-favbar-dropdown-item";
+      a.innerHTML = '<span class="icon">' + escHtml(tool.icon) + '</span><span class="label">' + escHtml(detectLang() === "ja" ? tool.ja : tool.en) + '</span>';
+      a.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        ev.preventDefault();
+        closeFavbarDropdown();
+        navigateTo({ type: "tool", courseId: course.id, tool: tool.id });
+      });
       dd.appendChild(a);
     });
-    el.appendChild(dd);
-    el.classList.add('open');
+    document.body.appendChild(dd);
+    var rect = item.getBoundingClientRect();
+    dd.style.top = (rect.bottom + 4) + "px";
+    dd.style.left = Math.min(rect.left, window.innerWidth - 260) + "px";
+    openDropdown = { dd: dd, item: item };
   }
-}
-// Close dropdown on outside tap
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.fav-item')) {
-    document.querySelectorAll('.fav-dropdown.open').forEach(function(d) { d.classList.remove('open'); d.parentElement.classList.remove('open'); });
+  function closeFavbarDropdown() {
+    if (!openDropdown) return;
+    if (openDropdown.dd) openDropdown.dd.remove();
+    if (openDropdown.item) openDropdown.item.classList.remove("is-open");
+    openDropdown = null;
   }
-});
+  document.addEventListener("click", function () { closeFavbarDropdown(); });
 
-/* Textbook toggle */
-function togTb(hd) {
-  var arr = hd.querySelector('.arr');
-  var items = hd.nextElementSibling;
-  if (!items) return;
-  arr.classList.toggle('shut');
-  items.classList.toggle('shut');
-}
-
-/* Settings toggle */
-function togSt(hd) {
-  var arr = hd.querySelector('.arr');
-  var rows = hd.nextElementSibling;
-  if (!rows) return;
-  arr.classList.toggle('shut');
-  rows.classList.toggle('shut');
-}
-
-/* Memo */
-var memos = [];
-function openMemo() {
-  var form = document.getElementById('memoForm');
-  var fab = document.getElementById('memoFab');
-  if (form.classList.contains('open')) {
-    closeMemo();
-  } else {
-    form.classList.add('open');
-    fab.classList.add('rotated');
-    document.getElementById('memoInput').focus();
+  function getCourseUrgencyClass(c) {
+    var rel = ASSIGNMENTS.filter(function (a) { return a.courseId === c.id && !isChecked(a) && !isSubmitted(a.status) && !isDismissed(a) && a.deadline; });
+    if (rel.length === 0) return "cs-tab-other";
+    rel.sort(function (a, b) { return a.deadline - b.deadline; });
+    return urgencyToCsTab(getUrgencyClass(rel[0].deadline));
   }
-}
-function closeMemo() {
-  document.getElementById('memoForm').classList.remove('open');
-  document.getElementById('memoFab').classList.remove('rotated');
-  document.getElementById('memoInput').value = '';
-}
-function saveMemo() {
-  var text = document.getElementById('memoInput').value.trim();
-  if (!text) return;
-  memos.push(text);
-  renderMemos();
-  closeMemo();
-}
-function deleteMemo(i) {
-  memos.splice(i, 1);
-  renderMemos();
-}
-function renderMemos() {
-  var container = document.getElementById('memoCards');
-  var cnt = document.getElementById('memoCnt');
-  cnt.textContent = '(' + memos.length + ')';
-  container.innerHTML = '';
-  memos.forEach(function(m, i) {
-    var card = document.createElement('div');
-    card.className = 'a-card memo-card';
-    card.innerHTML = '<div class="memo-text">' + escHtml(m) + '</div><button class="memo-del" onclick="deleteMemo(' + i + ')">&#x2715;</button>';
-    container.appendChild(card);
+
+  function formatCourseName(c) {
+    var nm = detectLang() === "ja" ? c.name : c.nameEn;
+    if (state.settings.courseNameCleanup) {
+      return c.short + " " + nm;
+    }
+    return "[2026前期" + ["日","月","火","水","木","金","土"][c.day] + c.period + "] " + nm;
+  }
+
+  // ============== Sidebar ==============
+  function renderSidebar() {
+    var sb = document.getElementById("lmsSidebar");
+    sb.innerHTML = "";
+
+    // Sakai-style "Home" section at top
+    var ja = detectLang() === "ja";
+    var homeSection = document.createElement("div");
+    homeSection.className = "sb-home-section";
+    var atHome = !state.currentView || state.currentView.type === "home";
+    homeSection.innerHTML = ''
+      + '<div class="sb-home-row sb-home-toggle" data-act="home-toggle">'
+      +   '<span class="sb-home-arrow">▾</span>'
+      +   '<span>Home</span>'
+      + '</div>'
+      + '<div class="sb-home-tool ' + (atHome ? "sb-home-active" : "") + '" data-act="home-overview"><span class="ico">≡</span><span>' + (ja ? "概要" : "Overview") + '</span></div>'
+      + '<div class="sb-home-tool" data-act="home-resources"><span class="ico">📁</span><span>' + (ja ? "授業資料（リソース）" : "Resources") + '</span></div>'
+      + '<div class="sb-home-other" data-act="home-other">' + (ja ? "その他" : "Other") + ' ▸</div>';
+    sb.appendChild(homeSection);
+    homeSection.querySelector("[data-act=home-overview]").addEventListener("click", function () {
+      navigateTo({ type: "home" });
+    });
+    homeSection.querySelector("[data-act=home-resources]").addEventListener("click", function () {
+      // jump to first pinned course's resources
+      var first = COURSES.filter(function (c) { return c.pinned; })[0];
+      if (first) navigateTo({ type: "tool", courseId: first.id, tool: "resources" });
+    });
+    homeSection.querySelector("[data-act=home-other]").addEventListener("click", function () {
+      showToast(ja ? "その他のツール" : "Other tools");
+    });
+
+    var pinHd = document.createElement("div");
+    pinHd.className = "sidebar-pin-heading";
+    pinHd.textContent = ja ? "ピン留め" : "Pinned";
+    sb.appendChild(pinHd);
+
+    var pinned = COURSES.filter(function (c) { return c.pinned; });
+    if (state.settings.pinSort) pinned.sort(function (a, b) { return (a.day - b.day) || (a.period - b.period); });
+    pinned.forEach(function (c) {
+      var item = document.createElement("div");
+      item.className = "sb-item " + (state.settings.tabColoring ? getCourseUrgencyClass(c) : "");
+      item.dataset.courseId = c.id;
+      if (state.expandedCourse === c.id) item.classList.add("expanded");
+
+      var name = document.createElement("span");
+      name.className = "name";
+      name.textContent = formatCourseName(c);
+
+      var pin = document.createElement("span");
+      pin.className = "pin-icon";
+      pin.textContent = "📌";
+
+      item.appendChild(name);
+      if (state.settings.notificationBadge && c.hasNewAssign) {
+        var dot = document.createElement("span");
+        dot.className = "notif-dot";
+        item.appendChild(dot);
+      }
+      item.appendChild(pin);
+      sb.appendChild(item);
+
+      // Tools
+      var tools = document.createElement("div");
+      tools.className = "sb-tools";
+      TOOLS.forEach(function (tt) {
+        var tEl = document.createElement("div");
+        tEl.className = "sb-tool";
+        tEl.innerHTML = '<span class="icon">' + escHtml(tt.icon) + '</span><span>'
+          + escHtml(detectLang() === "ja" ? tt.ja : tt.en) + '</span>';
+        tEl.addEventListener("click", function (e) {
+          e.stopPropagation();
+          navigateTo({ type: "tool", courseId: c.id, tool: tt.id });
+        });
+        tools.appendChild(tEl);
+      });
+      sb.appendChild(tools);
+
+      item.addEventListener("click", function () {
+        if (state.settings.courseRowClick) {
+          state.expandedCourse = state.expandedCourse === c.id ? null : c.id;
+          saveState();
+          renderSidebar();
+        } else {
+          navigateTo({ type: "tool", courseId: c.id, tool: "overview" });
+        }
+      });
+    });
+  }
+
+  // ============== KULMS+ Panel ==============
+  var panelEl = document.getElementById("kulms-assign-panel");
+  var contentEl = document.getElementById("panelContent");
+  var cacheInfoEl = document.getElementById("cacheInfo");
+  var openTime = NOW;
+
+  function buildTabBar() {
+    var tabBar = document.getElementById("tabBar");
+    tabBar.innerHTML = "";
+    var tabs = [
+      { id: "assignments", label: t("tabAssignments") },
+      { id: "textbooks",   label: t("tabTextbooks") },
+      { id: "settings",    label: t("tabSettings") }
+    ];
+    if (!state.settings.textbooks) tabs.splice(1, 1);
+    tabs.forEach(function (tt) {
+      var label = document.createElement("label");
+      label.className = "kulms-panel-tab" + (state.activeTab === tt.id ? " active" : "");
+      label.textContent = tt.label;
+      label.addEventListener("click", function () {
+        state.activeTab = tt.id;
+        saveState();
+        buildTabBar();
+        renderActiveView();
+      });
+      tabBar.appendChild(label);
+    });
+    if (!state.settings.textbooks && state.activeTab === "textbooks") {
+      state.activeTab = "assignments";
+    }
+  }
+
+  function openPanel() {
+    panelEl.classList.add("open");
+    document.getElementById("panelOverlay").classList.add("open");
+    state.panelOpen = true;
+    saveState();
+    if (state.settings.panelPush) {
+      document.body.style.transition = "margin-right 0.3s ease";
+      document.body.style.marginRight = "min(320px, 90vw)";
+    }
+    openTime = Date.now();
+    renderActiveView();
+  }
+  function closePanel() {
+    panelEl.classList.remove("open");
+    document.getElementById("panelOverlay").classList.remove("open");
+    state.panelOpen = false;
+    saveState();
+    document.body.style.marginRight = "";
+  }
+  function togglePanel() { panelEl.classList.contains("open") ? closePanel() : openPanel(); }
+
+  function renderActiveView() {
+    contentEl.innerHTML = "";
+    cacheInfoEl.textContent = "";
+    if (state.activeTab === "assignments") renderAssignments();
+    else if (state.activeTab === "textbooks") renderTextbooks();
+    else renderSettings();
+  }
+
+  // -------- Assignments --------
+  function renderAssignments() {
+    var ago = Math.floor((Date.now() - openTime) / MIN);
+    cacheInfoEl.textContent = ago < 1 ? t("lastUpdatedNow") : t("lastUpdatedMins", [String(ago)]);
+
+    var notDismissed = ASSIGNMENTS.filter(function (a) { return !isDismissed(a); });
+    var autoComplete = state.settings.autoComplete;
+    var now = Date.now();
+
+    var visible = notDismissed.filter(function (a) {
+      if (isExplicitlyActive(a)) return true;
+      var auto = autoComplete && isSubmitted(a.status);
+      var closed = a.closeTime && a.closeTime < now;
+      return !(auto && closed);
+    });
+
+    var completed = [], active = [];
+    visible.forEach(function (a) {
+      if (isExplicitlyActive(a)) {
+        a._resubmitActive = true;
+        active.push(a);
+      } else if (isChecked(a) || (autoComplete && isSubmitted(a.status))) {
+        a._completed = true;
+        completed.push(a);
+      } else {
+        active.push(a);
+      }
+    });
+    active.sort(function (a, b) {
+      if (a.deadline && b.deadline) return a.deadline - b.deadline;
+      if (a.deadline) return -1;
+      if (b.deadline) return 1;
+      return 0;
+    });
+
+    var groups = { overdue: [], danger: [], warning: [], success: [], other: [] };
+    active.forEach(function (a) {
+      var u = getUrgencyClass(a.deadline);
+      var key = u.replace("urgency-", "");
+      (groups[key] || groups.other).push(a);
+    });
+
+    // Integrate deadline memos
+    if (state.settings.memos) {
+      state.memos.forEach(function (memo) {
+        if (!memo.deadline) return;
+        var memoItem = {
+          courseName: memo.courseName || "",
+          courseId: memo.courseId || "",
+          name: memo.text,
+          deadline: memo.deadline,
+          closeTime: memo.deadline,
+          entityId: "memo-" + memo.id,
+          type: "memo",
+          _memoId: memo.id
+        };
+        if (isDismissed(memoItem)) return;
+        if (isChecked(memoItem)) { memoItem._completed = true; completed.push(memoItem); return; }
+        var u = getUrgencyClass(memo.deadline).replace("urgency-", "");
+        (groups[u] || groups.other).push(memoItem);
+      });
+      Object.keys(groups).forEach(function (k) {
+        groups[k].sort(function (a, b) { return (a.deadline||0) - (b.deadline||0); });
+      });
+    }
+
+    var s = state.settings;
+    if (groups.overdue.length) contentEl.appendChild(createSection(t("sectionOverdue"), groups.overdue, "overdue", false));
+    if (groups.danger.length) contentEl.appendChild(createSection(t("sectionDanger", [String(s.dangerHours)]), groups.danger, "danger", false));
+    if (groups.warning.length) contentEl.appendChild(createSection(t("sectionWarning", [String(s.warningDays)]), groups.warning, "warning", false));
+    if (groups.success.length) contentEl.appendChild(createSection(t("sectionSuccess", [String(s.successDays)]), groups.success, "success", false));
+    if (groups.other.length) contentEl.appendChild(createSection(t("sectionOther"), groups.other, "other", false));
+
+    // plain memos (no deadline)
+    if (state.settings.memos) renderPlainMemos();
+
+    if (completed.length) {
+      completed.sort(function (a, b) { return (b.deadline||0) - (a.deadline||0); });
+      contentEl.appendChild(createSection(t("sectionCompleted"), completed, "checked", true));
+    }
+
+    renderDeletedSection();
+    appendMemoButton();
+
+    if (active.length === 0 && completed.length === 0 && state.memos.length === 0) {
+      contentEl.innerHTML = "";
+      var empty = document.createElement("div");
+      empty.className = "kulms-assign-empty";
+      empty.textContent = t("noAssignments");
+      contentEl.appendChild(empty);
+      appendMemoButton();
+    }
+  }
+
+  function createSection(label, items, type, defaultCollapsed) {
+    var collapsed = type in state.sectionCollapsed ? state.sectionCollapsed[type] : defaultCollapsed;
+    var sec = document.createElement("div");
+    sec.className = "kulms-assign-section";
+    var hd = document.createElement("div");
+    hd.className = "kulms-assign-section-header kulms-section-" + type;
+    var tg = document.createElement("span");
+    tg.className = "kulms-assign-section-toggle" + (collapsed ? " collapsed" : "");
+    tg.textContent = "▼";
+    var tl = document.createElement("span"); tl.textContent = label;
+    var ct = document.createElement("span"); ct.className = "kulms-assign-section-count"; ct.textContent = "(" + items.length + ")";
+    hd.appendChild(tg); hd.appendChild(tl); hd.appendChild(ct);
+    var ic = document.createElement("div");
+    ic.className = "kulms-assign-section-items" + (collapsed ? " collapsed" : "");
+    items.forEach(function (a) { ic.appendChild(createCard(a)); });
+    hd.addEventListener("click", function () {
+      tg.classList.toggle("collapsed");
+      ic.classList.toggle("collapsed");
+      state.sectionCollapsed[type] = tg.classList.contains("collapsed");
+      saveState();
+    });
+    sec.appendChild(hd); sec.appendChild(ic);
+    return sec;
+  }
+
+  function createCard(a) {
+    var u = getUrgencyClass(a.deadline);
+    var card = document.createElement("div");
+    card.className = "kulms-assign-card " + u;
+    if (a._completed) card.classList.add("kulms-checked");
+    if (a.type === "memo") card.classList.add("kulms-memo-card");
+
+    if (a.type === "memo") {
+      var mb = document.createElement("span"); mb.className = "kulms-badge-memo"; mb.textContent = t("memoLabel");
+      card.appendChild(mb);
+      var mt = document.createElement("div"); mt.className = "kulms-memo-text"; mt.textContent = a.name;
+      card.appendChild(mt);
+      var meta = document.createElement("div"); meta.className = "kulms-assign-card-meta";
+      var dEl = document.createElement("span"); dEl.textContent = formatDeadline(a.deadline); meta.appendChild(dEl);
+      var rem = formatRemaining(a.deadline, a.closeTime);
+      if (rem) {
+        var rEl = document.createElement("span"); rEl.className = "kulms-time-remain";
+        if (rem === t("expired")) rEl.classList.add("overdue");
+        rEl.textContent = rem;
+        meta.appendChild(rEl);
+      }
+      card.appendChild(meta);
+      var del = document.createElement("button");
+      del.className = "kulms-memo-delete"; del.innerHTML = "&times;";
+      del.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (confirm(t("deleteConfirm"))) {
+          state.memos = state.memos.filter(function (m) { return m.id !== a._memoId; });
+          saveState();
+          renderActiveView();
+        }
+      });
+      card.appendChild(del);
+      return card;
+    }
+
+    var cb = document.createElement("div");
+    cb.className = "kulms-checkbox" + ((isChecked(a) && !isExplicitlyActive(a)) ? " checked" : "");
+    cb.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var key = getCheckedKey(a);
+      if (state.checked[key] && state.checked[key] !== "active") {
+        delete state.checked[key];
+      } else {
+        state.checked[key] = Date.now();
+      }
+      saveState();
+      renderActiveView();
+    });
+    card.appendChild(cb);
+
+    var body = document.createElement("div");
+    body.className = "kulms-assign-card-body";
+
+    var bRow = document.createElement("div");
+    bRow.className = "kulms-badge-row";
+    var pill = document.createElement("span");
+    pill.className = "kulms-course-pill " + u;
+    pill.textContent = a.courseName || assignCourseName(a);
+    bRow.appendChild(pill);
+    if (a.type === "quiz") {
+      var qb = document.createElement("span"); qb.className = "kulms-badge-quiz"; qb.textContent = t("badgeQuiz");
+      bRow.appendChild(qb);
+    }
+    if (isSubmitted(a.status) || a.status) {
+      var sb = document.createElement("span");
+      var st = (a.status || "").toLowerCase();
+      if (st.indexOf("評定") >= 0 || st.indexOf("graded") >= 0) {
+        sb.className = "kulms-assign-badge graded"; sb.textContent = t("statusGraded");
+      } else if (st.indexOf("提出") >= 0 || st.indexOf("submitted") >= 0) {
+        sb.className = "kulms-assign-badge submitted"; sb.textContent = t("statusSubmitted");
+      }
+      if (sb.textContent) bRow.appendChild(sb);
+    } else if (u === "urgency-overdue" || u === "urgency-danger") {
+      var nsb = document.createElement("span"); nsb.className = "kulms-assign-badge not-submitted";
+      nsb.textContent = t("statusNotSubmitted");
+      bRow.appendChild(nsb);
+    }
+    if (a._resubmitActive || (a.closeTime && a.closeTime > Date.now() && a.deadline < Date.now())) {
+      var rb = document.createElement("span");
+      if (a.allowResubmission === false) {
+        rb.className = "kulms-badge-no-resubmit"; rb.textContent = t("badgeNoResubmit");
+      } else {
+        rb.className = "kulms-badge-resubmit"; rb.textContent = t("badgeResubmit");
+      }
+      bRow.appendChild(rb);
+    }
+    body.appendChild(bRow);
+
+    var nm = document.createElement("div"); nm.className = "kulms-assign-card-name";
+    var aLink = document.createElement("a");
+    aLink.href = "#";
+    var displayName = a.type === "memo" ? a.name : (a.names ? assignName(a) : a.name);
+    aLink.textContent = displayName;
+    aLink.addEventListener("click", function (e) { e.preventDefault(); showToast(displayName); });
+    nm.appendChild(aLink);
+    body.appendChild(nm);
+
+    var meta = document.createElement("div"); meta.className = "kulms-assign-card-meta";
+    if (a.deadline) {
+      var dEl = document.createElement("span"); dEl.textContent = formatDeadline(a.deadline);
+      meta.appendChild(dEl);
+      var rem = formatRemaining(a.deadline, a.closeTime);
+      if (rem) {
+        var rEl = document.createElement("span"); rEl.className = "kulms-time-remain";
+        if (rem === t("expired")) rEl.classList.add("overdue");
+        rEl.textContent = rem;
+        meta.appendChild(rEl);
+      }
+    }
+    body.appendChild(meta);
+    card.appendChild(body);
+
+    var del = document.createElement("button");
+    del.className = "kulms-card-delete"; del.innerHTML = "&times;";
+    del.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (del.classList.contains("kulms-card-delete-confirm")) {
+        state.dismissed[getCheckedKey(a)] = { dismissedAt: Date.now(), name: a.name, courseName: a.courseName, deadline: a.deadline, type: a.type || "assignment" };
+        saveState();
+        renderActiveView();
+        showToast("Deleted");
+      } else {
+        del.classList.add("kulms-card-delete-confirm");
+        del.textContent = t("deleteConfirm");
+        setTimeout(function () { del.classList.remove("kulms-card-delete-confirm"); del.innerHTML = "&times;"; }, 2200);
+      }
+    });
+    card.appendChild(del);
+    return card;
+  }
+
+  function renderPlainMemos() {
+    var plain = state.memos.filter(function (m) { return !m.deadline && !state.dismissed["memo-" + m.id]; });
+    if (plain.length === 0) return;
+    var section = document.createElement("div");
+    section.className = "kulms-assign-section";
+    var hd = document.createElement("div");
+    hd.className = "kulms-assign-section-header kulms-section-memo";
+    var collapsed = state.sectionCollapsed["memo"] || false;
+    var tg = document.createElement("span"); tg.className = "kulms-assign-section-toggle" + (collapsed ? " collapsed" : ""); tg.textContent = "▼";
+    var tl = document.createElement("span"); tl.textContent = t("sectionMemo");
+    var ct = document.createElement("span"); ct.className = "kulms-assign-section-count"; ct.textContent = "(" + plain.length + ")";
+    hd.appendChild(tg); hd.appendChild(tl); hd.appendChild(ct);
+    var ic = document.createElement("div");
+    ic.className = "kulms-assign-section-items" + (collapsed ? " collapsed" : "");
+    plain.forEach(function (m) {
+      var card = document.createElement("div");
+      card.className = "kulms-assign-card kulms-memo-card";
+      var b = document.createElement("span"); b.className = "kulms-badge-memo"; b.textContent = t("memoLabel");
+      card.appendChild(b);
+      var mt = document.createElement("div"); mt.className = "kulms-memo-text"; mt.textContent = m.text;
+      card.appendChild(mt);
+      if (m.courseName) {
+        var meta = document.createElement("div"); meta.className = "kulms-assign-card-meta";
+        var cn = document.createElement("span"); cn.textContent = m.courseName;
+        meta.appendChild(cn);
+        card.appendChild(meta);
+      }
+      var del = document.createElement("button"); del.className = "kulms-memo-delete"; del.innerHTML = "&times;";
+      del.addEventListener("click", function () {
+        if (confirm(t("deleteConfirm"))) {
+          state.memos = state.memos.filter(function (mm) { return mm.id !== m.id; });
+          saveState();
+          renderActiveView();
+        }
+      });
+      card.appendChild(del);
+      ic.appendChild(card);
+    });
+    hd.addEventListener("click", function () {
+      tg.classList.toggle("collapsed");
+      ic.classList.toggle("collapsed");
+      state.sectionCollapsed["memo"] = tg.classList.contains("collapsed");
+      saveState();
+    });
+    section.appendChild(hd); section.appendChild(ic);
+    contentEl.appendChild(section);
+  }
+
+  function renderDeletedSection() {
+    var keys = Object.keys(state.dismissed);
+    if (keys.length === 0) return;
+    var section = document.createElement("div");
+    section.className = "kulms-assign-section";
+    var collapsed = "deleted" in state.sectionCollapsed ? state.sectionCollapsed["deleted"] : true;
+    var hd = document.createElement("div");
+    hd.className = "kulms-assign-section-header kulms-section-deleted";
+    var tg = document.createElement("span"); tg.className = "kulms-assign-section-toggle" + (collapsed ? " collapsed" : ""); tg.textContent = "▼";
+    var tl = document.createElement("span"); tl.textContent = t("sectionDeleted");
+    var ct = document.createElement("span"); ct.className = "kulms-assign-section-count"; ct.textContent = "(" + keys.length + ")";
+    hd.appendChild(tg); hd.appendChild(tl); hd.appendChild(ct);
+    var ic = document.createElement("div");
+    ic.className = "kulms-assign-section-items" + (collapsed ? " collapsed" : "");
+
+    var notice = document.createElement("div"); notice.className = "kulms-deleted-notice"; notice.textContent = t("autoDeleteNotice");
+    ic.appendChild(notice);
+
+    keys.sort(function (a, b) { return (state.dismissed[b].dismissedAt||0) - (state.dismissed[a].dismissedAt||0); });
+    keys.forEach(function (k) {
+      var data = state.dismissed[k];
+      var card = document.createElement("div");
+      card.className = "kulms-assign-card kulms-deleted-card";
+      var body = document.createElement("div"); body.className = "kulms-assign-card-body";
+      var bRow = document.createElement("div"); bRow.className = "kulms-badge-row";
+      var pill = document.createElement("span"); pill.className = "kulms-course-pill kulms-pill-deleted";
+      pill.textContent = data.courseName || "—";
+      bRow.appendChild(pill);
+      body.appendChild(bRow);
+      var nm = document.createElement("div"); nm.className = "kulms-assign-card-name"; nm.textContent = data.name || "(deleted)";
+      body.appendChild(nm);
+      if (data.deadline) {
+        var meta = document.createElement("div"); meta.className = "kulms-assign-card-meta";
+        var d = document.createElement("span"); d.textContent = formatDeadline(data.deadline);
+        meta.appendChild(d);
+        body.appendChild(meta);
+      }
+      card.appendChild(body);
+      var rs = document.createElement("button"); rs.className = "kulms-deleted-restore"; rs.textContent = t("restoreItem");
+      rs.addEventListener("click", function () {
+        delete state.dismissed[k];
+        saveState();
+        renderActiveView();
+        showToast(t("restoreOk"));
+      });
+      card.appendChild(rs);
+      ic.appendChild(card);
+    });
+    hd.addEventListener("click", function () {
+      tg.classList.toggle("collapsed");
+      ic.classList.toggle("collapsed");
+      state.sectionCollapsed["deleted"] = tg.classList.contains("collapsed");
+      saveState();
+    });
+    section.appendChild(hd); section.appendChild(ic);
+    contentEl.appendChild(section);
+  }
+
+  function appendMemoButton() {
+    if (!state.settings.memos) return;
+    var btn = document.createElement("button");
+    btn.className = "kulms-memo-btn";
+    btn.title = t("memoAdd");
+    btn.textContent = "+";
+    btn.addEventListener("click", function () { openMemoModal(); });
+    contentEl.appendChild(btn);
+  }
+
+  // -------- Memo modal --------
+  var memoModal = document.getElementById("memoModal");
+  function fillSelect(sel, start, end, pad2) {
+    sel.innerHTML = "";
+    for (var i = start; i <= end; i++) {
+      var o = document.createElement("option");
+      o.value = i; o.textContent = pad2 ? pad(i) : i;
+      sel.appendChild(o);
+    }
+  }
+  function openMemoModal() {
+    document.getElementById("memoModalTitle").textContent = t("memoAdd");
+    document.getElementById("memoInput").placeholder = t("memoPlaceholder");
+    document.getElementById("memoCancelBtn").textContent = t("memoCancel");
+    document.getElementById("memoSaveBtn").textContent = t("memoSave");
+    var d = new Date(Date.now() + DAY);
+    var ySel = document.getElementById("memoYear");
+    var mSel = document.getElementById("memoMonth");
+    var dSel = document.getElementById("memoDay");
+    var hSel = document.getElementById("memoHour");
+    var nSel = document.getElementById("memoMin");
+    fillSelect(ySel, d.getFullYear(), d.getFullYear() + 2);
+    fillSelect(mSel, 1, 12, true);
+    fillSelect(dSel, 1, 31, true);
+    fillSelect(hSel, 0, 23, true);
+    fillSelect(nSel, 0, 59, true);
+    ySel.value = d.getFullYear(); mSel.value = d.getMonth() + 1; dSel.value = d.getDate();
+    hSel.value = 23; nSel.value = 59;
+    var cs = document.getElementById("memoCourseSel");
+    cs.innerHTML = "";
+    var optEmpty = document.createElement("option"); optEmpty.value = ""; optEmpty.textContent = t("memoCourseSelect");
+    cs.appendChild(optEmpty);
+    COURSES.forEach(function (c) {
+      var o = document.createElement("option");
+      o.value = c.id;
+      o.textContent = c.short + " " + c.name;
+      cs.appendChild(o);
+    });
+    document.getElementById("memoInput").value = "";
+    memoModal.classList.add("open");
+  }
+  function closeMemoModal() { memoModal.classList.remove("open"); }
+  document.getElementById("memoModalClose").addEventListener("click", closeMemoModal);
+  document.getElementById("memoCancelBtn").addEventListener("click", closeMemoModal);
+  document.getElementById("memoSaveBtn").addEventListener("click", function () {
+    var text = document.getElementById("memoInput").value.trim();
+    if (!text) return;
+    var ySel = document.getElementById("memoYear");
+    var mSel = document.getElementById("memoMonth");
+    var dSel = document.getElementById("memoDay");
+    var hSel = document.getElementById("memoHour");
+    var nSel = document.getElementById("memoMin");
+    var dl = new Date(parseInt(ySel.value, 10), parseInt(mSel.value, 10) - 1, parseInt(dSel.value, 10), parseInt(hSel.value, 10), parseInt(nSel.value, 10)).getTime();
+    var cid = document.getElementById("memoCourseSel").value;
+    var course = COURSES.filter(function (c) { return c.id === cid; })[0];
+    state.memos.push({
+      id: "m" + Date.now() + Math.random().toString(36).slice(2, 6),
+      text: text, deadline: dl,
+      courseId: cid || "",
+      courseName: course ? (course.short + " " + course.name) : ""
+    });
+    saveState();
+    closeMemoModal();
+    renderActiveView();
+    showToast(t("saveOk"));
   });
-}
-function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-/* Open panel on load */
-setTimeout(function() { togglePanel(); }, 400);
+  // -------- Textbooks --------
+  var courseCollapsed = {};
+  function renderTextbooks() {
+    var note = document.createElement("div");
+    note.className = "kulms-textbook-note";
+    note.textContent = detectLang() === "ja"
+      ? "※ KULASIS公開シラバスに登録されている科目のみ対応。"
+      : "* Only courses registered in the KULASIS syllabus are supported.";
+    contentEl.appendChild(note);
+
+    COURSES.forEach(function (c) {
+      var sec = document.createElement("div"); sec.className = "kulms-textbook-course";
+      var hd = document.createElement("div"); hd.className = "kulms-textbook-course-header";
+      var collapsed = courseCollapsed[c.id] || false;
+      var tg = document.createElement("span"); tg.className = "kulms-textbook-course-toggle" + (collapsed ? " collapsed" : ""); tg.textContent = "▼";
+      var nm = document.createElement("span"); nm.className = "kulms-textbook-course-name"; nm.textContent = c.short + " " + c.name;
+      var ct = document.createElement("span"); ct.className = "kulms-textbook-course-count"; ct.textContent = "(" + c.textbooks.length + ")";
+      hd.appendChild(tg); hd.appendChild(nm); hd.appendChild(ct);
+      if (!c.hasSyllabus) {
+        var bd = document.createElement("span"); bd.className = "kulms-textbook-course-badge";
+        bd.textContent = detectLang() === "ja" ? "シラバス未登録" : "No syllabus";
+        hd.appendChild(bd);
+      } else if (c.textbooks.length === 0) {
+        var bd2 = document.createElement("span"); bd2.className = "kulms-textbook-course-badge";
+        bd2.textContent = detectLang() === "ja" ? "教科書なし" : "No books";
+        hd.appendChild(bd2);
+      } else {
+        var sy = document.createElement("a"); sy.className = "kulms-textbook-syllabus";
+        sy.textContent = detectLang() === "ja" ? "シラバス" : "Syllabus";
+        sy.href = "#";
+        sy.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); showToast(c.short + " Syllabus"); });
+        hd.appendChild(sy);
+      }
+      var ic = document.createElement("div"); ic.className = "kulms-textbook-course-items" + (collapsed ? " collapsed" : "");
+      var byType = { textbook: [], reference: [] };
+      c.textbooks.forEach(function (b) { (byType[b.type] || byType.textbook).push(b); });
+      ["textbook", "reference"].forEach(function (typ) {
+        if (byType[typ].length === 0) return;
+        var lbl = document.createElement("div"); lbl.className = "kulms-textbook-group-label";
+        lbl.textContent = typ === "textbook"
+          ? (detectLang() === "ja" ? "教科書" : "Textbooks")
+          : (detectLang() === "ja" ? "参考書" : "References");
+        ic.appendChild(lbl);
+        byType[typ].forEach(function (b) {
+          var item = document.createElement("div"); item.className = "kulms-textbook-item";
+          var info = document.createElement("div"); info.className = "kulms-textbook-info";
+          var ttl = document.createElement("div"); ttl.className = "kulms-textbook-title"; ttl.textContent = b.title;
+          info.appendChild(ttl);
+          var metaText = [b.author, b.publisher].filter(function (x) { return x; }).join(" / ");
+          if (metaText) {
+            var md = document.createElement("div"); md.className = "kulms-textbook-meta"; md.textContent = metaText;
+            info.appendChild(md);
+          }
+          item.appendChild(info);
+          var az = document.createElement("a"); az.className = "kulms-textbook-amazon";
+          az.textContent = "Amazon"; az.href = "#";
+          az.title = b.isbn ? ("ISBN: " + b.isbn) : "Amazon";
+          az.addEventListener("click", function (e) {
+            e.preventDefault();
+            showToast(detectLang() === "ja" ? "Amazonで検索: " + b.title : "Amazon search: " + b.title);
+          });
+          item.appendChild(az);
+          ic.appendChild(item);
+        });
+      });
+      hd.addEventListener("click", function (e) {
+        if (e.target.classList.contains("kulms-textbook-syllabus")) return;
+        tg.classList.toggle("collapsed");
+        ic.classList.toggle("collapsed");
+        courseCollapsed[c.id] = tg.classList.contains("collapsed");
+      });
+      sec.appendChild(hd); sec.appendChild(ic);
+      contentEl.appendChild(sec);
+    });
+  }
+
+  // -------- Settings --------
+  var settingsCollapsed = {};
+  function renderSettings() {
+    var view = document.createElement("div"); view.className = "kulms-settings-view";
+
+    function makeCard(title, key, rows) {
+      var card = document.createElement("div"); card.className = "kulms-settings-card";
+      var hd = document.createElement("div"); hd.className = "kulms-settings-section-header";
+      var ch = document.createElement("span"); ch.className = "kulms-settings-chevron"; ch.textContent = "▼";
+      if (settingsCollapsed[key]) ch.classList.add("collapsed");
+      var lbl = document.createElement("span"); lbl.textContent = title;
+      hd.appendChild(ch); hd.appendChild(lbl);
+      var body = document.createElement("div"); body.className = "kulms-settings-card-body" + (settingsCollapsed[key] ? " collapsed" : "");
+      hd.addEventListener("click", function () {
+        ch.classList.toggle("collapsed");
+        body.classList.toggle("collapsed");
+        settingsCollapsed[key] = body.classList.contains("collapsed");
+      });
+      rows.forEach(function (r) { body.appendChild(r); });
+      card.appendChild(hd); card.appendChild(body);
+      return card;
+    }
+
+    function row(label, desc, control) {
+      var r = document.createElement("div"); r.className = "kulms-settings-row";
+      var txt = document.createElement("div"); txt.className = "kulms-settings-row-text";
+      var lbLine = document.createElement("div"); lbLine.style.display = "flex"; lbLine.style.alignItems = "center"; lbLine.style.gap = "4px";
+      var lb = document.createElement("div"); lb.className = "kulms-settings-row-label"; lb.textContent = label;
+      lbLine.appendChild(lb);
+      if (desc) {
+        var ic = document.createElement("span"); ic.className = "kulms-settings-info-icon"; ic.textContent = "ⓘ";
+        var ds = document.createElement("div"); ds.className = "kulms-settings-desc"; ds.textContent = desc;
+        ic.addEventListener("click", function (e) { e.stopPropagation(); ds.classList.toggle("open"); });
+        lbLine.appendChild(ic);
+        txt.appendChild(lbLine);
+        txt.appendChild(ds);
+      } else {
+        txt.appendChild(lbLine);
+      }
+      r.appendChild(txt);
+      r.appendChild(control);
+      return r;
+    }
+
+    function toggleCtrl(key) {
+      var l = document.createElement("label"); l.className = "kulms-toggle";
+      var i = document.createElement("input"); i.type = "checkbox"; i.checked = !!state.settings[key];
+      var sl = document.createElement("span"); sl.className = "kulms-toggle-slider";
+      l.appendChild(i); l.appendChild(sl);
+      i.addEventListener("change", function () {
+        state.settings[key] = i.checked;
+        saveState(); applyAll();
+      });
+      return l;
+    }
+    function selectCtrl(key, options) {
+      var s = document.createElement("select"); s.className = "kulms-settings-select";
+      options.forEach(function (op) {
+        var o = document.createElement("option"); o.value = op.value; o.textContent = op.label;
+        if (state.settings[key] === op.value) o.selected = true;
+        s.appendChild(o);
+      });
+      s.addEventListener("change", function () {
+        state.settings[key] = s.value;
+        saveState(); applyAll();
+      });
+      return s;
+    }
+    function numberCtrl(key, min, max) {
+      var i = document.createElement("input"); i.type = "number"; i.className = "kulms-settings-number";
+      i.value = state.settings[key]; i.min = min; i.max = max;
+      i.addEventListener("change", function () {
+        var v = parseFloat(i.value); if (isNaN(v)) v = state.settings[key];
+        if (v < min) v = min; if (v > max) v = max;
+        state.settings[key] = v; i.value = v;
+        saveState(); applyAll();
+      });
+      return i;
+    }
+    function colorCtrl(key) {
+      var i = document.createElement("input"); i.type = "color"; i.className = "kulms-settings-color";
+      i.value = state.settings[key];
+      i.addEventListener("change", function () {
+        state.settings[key] = i.value;
+        saveState(); applyAll();
+      });
+      return i;
+    }
+
+    // Appearance
+    view.appendChild(makeCard(t("sectionAppearance"), "appearance", [
+      row(t("settingsLanguage"), t("settingsLanguageDesc"), selectCtrl("language", [
+        { value: "auto", label: t("langAuto") }, { value: "ja", label: "日本語" }, { value: "en", label: "English" }
+      ])),
+      row(t("featTabColoring"), t("featTabColoringDesc"), toggleCtrl("tabColoring")),
+      row(t("settingsTabColorStyle"), null, selectCtrl("tabColorStyle", [
+        { value: "border", label: t("tabColorStyleBorder") },
+        { value: "background", label: t("tabColorStyleBackground") },
+        { value: "bold", label: t("tabColorStyleBold") }
+      ]))
+    ]));
+
+    // Panel
+    view.appendChild(makeCard(t("sectionPanel"), "panel", [
+      row(t("featTextbooks"), t("featTextbooksDesc"), toggleCtrl("textbooks")),
+      row(t("featMemos"), t("featMemosDesc"), toggleCtrl("memos")),
+      row(t("featPanelPush"), t("featPanelPushDesc"), toggleCtrl("panelPush"))
+    ]));
+
+    // Assignment Updates
+    view.appendChild(makeCard(t("sectionAssignmentUpdates"), "updates", [
+      row(t("featAutoComplete"), t("featAutoCompleteDesc"), toggleCtrl("autoComplete")),
+      row(t("settingsAutoRefresh"), t("settingsAutoRefreshDesc"), numberCtrl("fetchInterval", 30, 3600))
+    ]));
+
+    // Urgency
+    view.appendChild(makeCard(t("sectionUrgency"), "urgency", [
+      row(t("settingsDangerHours"), t("settingsDangerHoursDesc"), numberCtrl("dangerHours", 1, 240)),
+      row(t("settingsWarningDays"), t("settingsWarningDaysDesc"), numberCtrl("warningDays", 1, 60)),
+      row(t("settingsSuccessDays"), t("settingsSuccessDaysDesc"), numberCtrl("successDays", 1, 90)),
+      row(t("settingsColorDanger"), null, colorCtrl("colorDanger")),
+      row(t("settingsColorWarning"), null, colorCtrl("colorWarning")),
+      row(t("settingsColorSuccess"), null, colorCtrl("colorSuccess")),
+      row(t("settingsColorOther"), null, colorCtrl("colorOther"))
+    ]));
+
+    // Sidebar
+    view.appendChild(makeCard(t("sectionSidebar"), "sidebar", [
+      row(t("featCourseNameCleanup"), t("featCourseNameCleanupDesc"), toggleCtrl("courseNameCleanup")),
+      row(t("featPinSort"), t("featPinSortDesc"), toggleCtrl("pinSort")),
+      row(t("featCourseRowClick"), t("featCourseRowClickDesc"), toggleCtrl("courseRowClick")),
+      row(t("featToolVisibility"), t("featToolVisibilityDesc"), toggleCtrl("toolVisibility")),
+      row(t("featSidebarResize"), t("featSidebarResizeDesc"), toggleCtrl("sidebarResize")),
+      row(t("featSidebarStyle"), t("featSidebarStyleDesc"), toggleCtrl("sidebarStyle")),
+      row(t("featNotificationBadge"), t("featNotificationBadgeDesc"), toggleCtrl("notificationBadge"))
+    ]));
+
+    // Top Favbar
+    view.appendChild(makeCard(t("sectionTopFavbar"), "topbar", [
+      row(t("featTopFavbar"), t("featTopFavbarDesc"), toggleCtrl("topFavbar")),
+      row(t("settingsTopFavbarSize"), null, selectCtrl("topFavbarSize", [
+        { value: "small", label: t("sizeSmall") },
+        { value: "medium", label: t("sizeMedium") },
+        { value: "large", label: t("sizeLarge") },
+        { value: "xlarge", label: t("sizeXLarge") }
+      ])),
+      row(t("featCurrentPeriod"), t("featCurrentPeriodDesc"), toggleCtrl("currentPeriodHighlight"))
+    ]));
+
+    // Course Page
+    view.appendChild(makeCard(t("sectionCoursePage"), "course", [
+      row(t("featFolderExpand"), t("featFolderExpandDesc"), toggleCtrl("folderExpand")),
+      row(t("featAutoExpandAll"), t("featAutoExpandAllDesc"), toggleCtrl("autoExpandAll")),
+      row(t("featHideResourceColumns"), t("featHideResourceColumnsDesc"), toggleCtrl("hideResourceColumns"))
+    ]));
+
+    // Bulk action buttons
+    var btnRow = document.createElement("div"); btnRow.className = "kulms-settings-btn-row";
+    var b1 = document.createElement("button"); b1.className = "kulms-settings-btn"; b1.textContent = t("btnDefaults");
+    b1.addEventListener("click", function () {
+      state.settings = JSON.parse(JSON.stringify(DEFAULTS.settings));
+      saveState(); applyAll();
+    });
+    var b2 = document.createElement("button"); b2.className = "kulms-settings-btn"; b2.textContent = t("btnAllOn");
+    b2.addEventListener("click", function () {
+      Object.keys(state.settings).forEach(function (k) { if (typeof state.settings[k] === "boolean") state.settings[k] = true; });
+      saveState(); applyAll();
+    });
+    var b3 = document.createElement("button"); b3.className = "kulms-settings-btn"; b3.textContent = t("btnAllOff");
+    b3.addEventListener("click", function () {
+      Object.keys(state.settings).forEach(function (k) { if (typeof state.settings[k] === "boolean") state.settings[k] = false; });
+      saveState(); applyAll();
+    });
+    btnRow.appendChild(b1); btnRow.appendChild(b2); btnRow.appendChild(b3);
+    view.appendChild(btnRow);
+
+    // Feedback link
+    var fb = document.createElement("a"); fb.className = "kulms-feedback-link"; fb.textContent = t("feedbackLink"); fb.href = "#";
+    fb.addEventListener("click", function (e) { e.preventDefault(); showToast(t("feedbackLink")); });
+    view.appendChild(fb);
+
+    // Footer
+    var ft = document.createElement("div"); ft.className = "kulms-settings-footer"; ft.textContent = t("settingsFooter");
+    view.appendChild(ft);
+
+    contentEl.appendChild(view);
+  }
+
+  // ============== Main page renderer (home or tool view) ==============
+  function renderMainPage() {
+    var page = document.getElementById("lmsPage");
+    if (!page) return;
+    page.innerHTML = "";
+    var v = state.currentView || { type: "home" };
+    if (v.type === "home") {
+      renderHomePage(page);
+    } else if (v.type === "tool") {
+      renderToolPage(page, v.courseId, v.tool);
+    }
+  }
+
+  function renderHomePage(page) {
+    var ja = detectLang() === "ja";
+
+    // Today's messages portlet
+    var p1 = portlet(ja ? "今日のメッセージ" : "Today's Messages");
+    p1.body.appendChild(card({
+      title: ja ? "【お知らせ】第一回MATLAB講習会(オンライン開催) (4/28)"
+                : "[Notice] 1st MATLAB Workshop (Online, 4/28)",
+      desc: ja ? "MATLAB未経験〜初心者向け。データ取込・可視化・基本解析を実習形式で。"
+               : "For MATLAB beginners. Data import, visualization, and basic analysis hands-on.",
+      meta: "2026.4.15"
+    }));
+    p1.body.appendChild(card({
+      title: ja ? "【お知らせ】Turnitin Feedback Studio講習会 (4/27)"
+                : "[Notice] Turnitin Feedback Studio Workshop (4/27)",
+      desc: ja ? "KULMSを利用したTurnitin類似性チェックツールの使い方。"
+               : "How to use Turnitin similarity-checking tool on KULMS.",
+      meta: "2026.4.14"
+    }));
+    page.appendChild(p1.root);
+
+    // Recent announcements portlet (links to course tool pages)
+    var p2 = portlet(ja ? "最近のお知らせ" : "Recent Announcements");
+    [
+      { courseId: "c-mon3", titleJa: "レポート#1 締切: 4/20 22:00", titleEn: "Report #1 deadline: Apr 20 22:00", meta: "2026.4.18", tool: "assignments" },
+      { courseId: "c-mon1", titleJa: "第4回講義資料をアップロードしました", titleEn: "Week 4 lecture materials uploaded", meta: "2026.4.16", tool: "resources" },
+      { courseId: "c-tue2", titleJa: "プログラミング演習#3を公開しました", titleEn: "Programming Exercise #3 released", meta: "2026.4.15", tool: "assignments" }
+    ].forEach(function (a) {
+      var c = getCourseById(a.courseId);
+      var ann = document.createElement("div");
+      ann.className = "lms-card";
+      ann.style.cursor = "pointer";
+      ann.innerHTML = '<div class="lms-card-title">' + escHtml(courseNameFor(c)) + '</div>'
+        + '<div>' + escHtml(ja ? a.titleJa : a.titleEn) + '</div>'
+        + '<div class="lms-card-meta">' + a.meta + '</div>';
+      ann.addEventListener("click", function () {
+        navigateTo({ type: "tool", courseId: a.courseId, tool: a.tool });
+      });
+      p2.body.appendChild(ann);
+    });
+    page.appendChild(p2.root);
+  }
+
+  function portlet(title) {
+    var root = document.createElement("div");
+    root.className = "lms-portlet";
+    var hd = document.createElement("div");
+    hd.className = "lms-portlet-header";
+    hd.innerHTML = '<span class="lms-portlet-title">' + escHtml(title) + '</span>'
+      + '<a href="#" class="lms-portlet-link">' + (detectLang() === "ja" ? "リンク" : "Link") + '</a>';
+    hd.querySelector("a").addEventListener("click", function (e) { e.preventDefault(); });
+    var body = document.createElement("div");
+    body.className = "lms-portlet-body";
+    root.appendChild(hd);
+    root.appendChild(body);
+    return { root: root, body: body };
+  }
+
+  function card(d) {
+    var el = document.createElement("div");
+    el.className = "lms-card";
+    el.innerHTML = '<div class="lms-card-title">' + escHtml(d.title) + '</div>'
+      + '<div>' + escHtml(d.desc || "") + '</div>'
+      + (d.meta ? ('<div class="lms-card-meta">' + escHtml(d.meta) + '</div>') : '');
+    return el;
+  }
+
+  function renderToolPage(page, courseId, tool) {
+    var c = getCourseById(courseId);
+    if (!c) { state.currentView = { type: "home" }; renderHomePage(page); return; }
+    var ja = detectLang() === "ja";
+
+    // Back-to-home bar
+    var back = document.createElement("div");
+    back.className = "lms-back-bar";
+    back.innerHTML = '<span class="arrow">←</span><span>'
+      + (ja ? "ホームに戻る" : "Back to Home")
+      + '</span>';
+    back.addEventListener("click", function () { navigateTo({ type: "home" }); });
+    page.appendChild(back);
+
+    // Course title
+    var title = document.createElement("div");
+    title.className = "tool-page-title";
+    title.textContent = courseNameFor(c);
+    page.appendChild(title);
+    var meta = document.createElement("div");
+    meta.className = "tool-page-meta";
+    meta.textContent = ja
+      ? "2026年度 前期 / " + ["日","月","火","水","木","金","土"][c.day] + "曜" + c.period + "限"
+      : "AY 2026 Spring / " + ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][c.day] + " " + c.period;
+    page.appendChild(meta);
+
+    // Tool sub-nav
+    var nav = document.createElement("div");
+    nav.className = "tool-subnav";
+    TOOLS.forEach(function (tt) {
+      var item = document.createElement("div");
+      item.className = "tool-subnav-item" + (tt.id === tool ? " active" : "");
+      item.innerHTML = '<span class="ico">' + escHtml(tt.icon) + '</span><span>'
+        + escHtml(ja ? tt.ja : tt.en) + '</span>';
+      item.addEventListener("click", function () {
+        navigateTo({ type: "tool", courseId: courseId, tool: tt.id });
+      });
+      nav.appendChild(item);
+    });
+    page.appendChild(nav);
+
+    // Tool body
+    var body = document.createElement("div");
+    body.style.padding = "8px 0 24px";
+    page.appendChild(body);
+
+    if (tool === "overview") renderToolOverview(body, c);
+    else if (tool === "resources") renderToolResources(body, c);
+    else if (tool === "assignments") renderToolAssignments(body, c);
+    else if (tool === "forums") renderToolForums(body, c);
+    else if (tool === "gradebook") renderToolGradebook(body, c);
+    else if (tool === "syllabus") renderToolSyllabus(body, c);
+  }
+
+  function renderToolOverview(body, c) {
+    var ja = detectLang() === "ja";
+    var p1 = portlet(ja ? "授業紹介" : "Course Description");
+    var d = document.createElement("div");
+    d.className = "lms-card";
+    d.innerHTML = '<div>' + escHtml(c.short + " " + (ja ? c.name : c.nameEn)) + (ja ? "の授業ホームです。お知らせ、課題、教材をここで確認できます。" : " — course home. Check announcements, assignments, and materials here.") + '</div>';
+    p1.body.appendChild(d);
+    body.appendChild(p1.root);
+
+    var p2 = portlet(ja ? "お知らせ" : "Announcements");
+    var ann1 = card({
+      title: ja ? "第" + (Math.floor(Math.random()*3)+3) + "回講義資料を公開" : "Lecture materials released",
+      desc: ja ? "次回講義の資料を授業資料からダウンロードしてください。" : "Please download the materials for the next class.",
+      meta: "2026.4.18"
+    });
+    var ann2 = card({
+      title: ja ? "課題提出締切のお知らせ" : "Upcoming assignment deadline",
+      desc: ja ? "今週末締切の課題があります。" : "An assignment is due this weekend.",
+      meta: "2026.4.16"
+    });
+    p2.body.appendChild(ann1);
+    p2.body.appendChild(ann2);
+    body.appendChild(p2.root);
+  }
+
+  function renderToolResources(body, c) {
+    var ja = detectLang() === "ja";
+    var t = document.createElement("div");
+    t.className = "res-table";
+    var hd = document.createElement("div");
+    hd.className = "res-table-header";
+    hd.innerHTML = '<span></span><span>' + (ja ? "名前" : "Name") + '</span><span style="text-align:right">' + (ja ? "更新日" : "Modified") + '</span>';
+    t.appendChild(hd);
+    var items = [
+      { type: "folder", name: ja ? "講義資料" : "Lectures", date: "2026.4.18", depth: 0, children: [
+        { type: "file", name: "Week01_スライド.pdf", date: "2026.4.10", depth: 1 },
+        { type: "file", name: "Week02_スライド.pdf", date: "2026.4.17", depth: 1 },
+        { type: "folder", name: ja ? "補足資料" : "Sub-materials", date: "2026.4.16", depth: 1, children: [
+          { type: "file", name: "ノート.pdf", date: "2026.4.15", depth: 2 },
+          { type: "file", name: "例題.zip",   date: "2026.4.14", depth: 2 }
+        ] }
+      ] },
+      { type: "folder", name: ja ? "課題関連" : "Assignments", date: "2026.4.13", depth: 0, children: [
+        { type: "file", name: "Report1_テンプレート.docx", date: "2026.4.13", depth: 1 },
+        { type: "file", name: "ProblemSet4.pdf", date: "2026.4.16", depth: 1 }
+      ] },
+      { type: "file", name: "シラバス.pdf", date: "2026.4.1", depth: 0 }
+    ];
+    function appendRow(it) {
+      var row = document.createElement("div");
+      row.className = "res-table-row indent-" + it.depth + (it.type === "folder" ? " folder" : "");
+      row.innerHTML = '<span class="ico">' + (it.type === "folder" ? '📁' : '📄') + '</span>'
+        + '<span class="name"><a href="#" onclick="return false">' + escHtml(it.name) + '</a></span>'
+        + '<span class="meta">' + escHtml(it.date) + '</span>';
+      t.appendChild(row);
+      if (it.type === "folder") {
+        var childRows = [];
+        it.children.forEach(function (ch) {
+          var startIdx = t.children.length;
+          appendRow(ch);
+          var added = Array.prototype.slice.call(t.children, startIdx);
+          childRows = childRows.concat(added);
+        });
+        row.addEventListener("click", function () {
+          var hidden = childRows[0] && childRows[0].classList.contains("collapsed-children");
+          childRows.forEach(function (r) { r.classList.toggle("collapsed-children", !hidden); });
+        });
+      } else {
+        row.querySelector(".name a").addEventListener("click", function (e) { e.preventDefault(); showToast(it.name); });
+      }
+    }
+    items.forEach(appendRow);
+    body.appendChild(t);
+  }
+
+  function renderToolAssignments(body, c) {
+    var ja = detectLang() === "ja";
+    var courseAssigns = ASSIGNMENTS.filter(function (a) { return a.courseId === c.id; });
+    if (courseAssigns.length === 0) {
+      var empty = document.createElement("div");
+      empty.style.cssText = "padding:24px;text-align:center;color:var(--text2)";
+      empty.textContent = ja ? "この授業の課題はありません" : "No assignments for this course";
+      body.appendChild(empty);
+      return;
+    }
+    var list = document.createElement("div");
+    list.className = "assign-list";
+    courseAssigns.forEach(function (a) {
+      var row = document.createElement("div");
+      row.className = "assign-row";
+      var status = "";
+      if (a.status && a.status.indexOf("評定") >= 0) status = ja ? "評定済" : "Graded";
+      else if (a.status && a.status.indexOf("提出") >= 0) status = ja ? "提出済" : "Submitted";
+      else if (a.deadline && a.deadline < Date.now()) status = ja ? "期限切れ" : "Overdue";
+      else status = ja ? "未提出" : "Not submitted";
+      row.innerHTML = '<div class="assign-row-name">' + escHtml(assignName(a)) + '</div>'
+        + '<div class="assign-row-meta">'
+        + (a.deadline ? formatDeadline(a.deadline) + '<br>' : '')
+        + '<span style="font-weight:600">' + escHtml(status) + '</span>'
+        + (a.grade ? ' / ' + escHtml(a.grade) : '')
+        + '</div>';
+      row.addEventListener("click", function () { showToast(assignName(a)); });
+      list.appendChild(row);
+    });
+    body.appendChild(list);
+  }
+
+  function renderToolForums(body, c) {
+    var ja = detectLang() === "ja";
+    var threads = [
+      { author: "山田", title: ja ? "課題#2の質問について" : "Question about Assignment #2", preview: ja ? "課題の3問目で..." : "On problem 3 of the assignment...", count: 4, when: "3" + (ja ? "時間前" : "h ago") },
+      { author: "佐藤", title: ja ? "次週の予習範囲" : "Reading for next week", preview: ja ? "教科書のp.45..." : "Textbook page 45...", count: 2, when: ja ? "昨日" : "Yesterday" },
+      { author: "鈴木", title: ja ? "推薦参考文献" : "Recommended references", preview: ja ? "理解を深めるために..." : "For deeper understanding...", count: 7, when: "2" + (ja ? "日前" : "d ago") }
+    ];
+    var list = document.createElement("div");
+    list.className = "forum-list";
+    threads.forEach(function (t) {
+      var row = document.createElement("div");
+      row.className = "forum-row";
+      row.innerHTML = '<div class="avatar">' + escHtml(t.author.slice(0, 1)) + '</div>'
+        + '<div class="body">'
+        + '<div class="title">' + escHtml(t.title) + '</div>'
+        + '<div class="meta">' + escHtml(t.author) + ' · ' + escHtml(t.when) + '</div>'
+        + '<div class="preview">' + escHtml(t.preview) + '</div>'
+        + '</div>'
+        + '<div class="count">' + t.count + '</div>';
+      row.addEventListener("click", function () { showToast(t.title); });
+      list.appendChild(row);
+    });
+    body.appendChild(list);
+  }
+
+  function renderToolGradebook(body, c) {
+    var ja = detectLang() === "ja";
+    var courseAssigns = ASSIGNMENTS.filter(function (a) { return a.courseId === c.id && a.grade; });
+    var t = document.createElement("div");
+    t.className = "grade-table";
+    var hd = document.createElement("div");
+    hd.className = "grade-row header";
+    hd.innerHTML = '<span>' + (ja ? "課題" : "Assignment") + '</span>'
+      + '<span style="text-align:center">' + (ja ? "得点" : "Score") + '</span>'
+      + '<span style="text-align:center">' + (ja ? "評定" : "Grade") + '</span>';
+    t.appendChild(hd);
+    if (courseAssigns.length === 0) {
+      var empty = document.createElement("div");
+      empty.style.cssText = "padding:24px;text-align:center;color:var(--text2)";
+      empty.textContent = ja ? "まだ評定された課題はありません" : "No graded assignments yet";
+      t.appendChild(empty);
+    } else {
+      courseAssigns.forEach(function (a) {
+        var letter = a.grade || "—";
+        var letterCls = letter[0] || "";
+        var score = letter === "A" ? "92" : letter === "B+" ? "85" : "—";
+        var row = document.createElement("div");
+        row.className = "grade-row";
+        row.innerHTML = '<span>' + escHtml(assignName(a)) + '</span>'
+          + '<span class="score">' + escHtml(score) + '</span>'
+          + '<span class="grade ' + letterCls + '">' + escHtml(letter) + '</span>';
+        t.appendChild(row);
+      });
+    }
+    body.appendChild(t);
+  }
+
+  function renderToolSyllabus(body, c) {
+    var ja = detectLang() === "ja";
+    if (!c.hasSyllabus) {
+      var empty = document.createElement("div");
+      empty.style.cssText = "padding:24px;text-align:center;color:var(--text2)";
+      empty.textContent = ja ? "この授業のシラバスはKULASISに登録されていません" : "Syllabus not registered in KULASIS";
+      body.appendChild(empty);
+      return;
+    }
+    var box = document.createElement("div");
+    box.className = "syllabus-card";
+    var dayName = ["日","月","火","水","木","金","土"][c.day];
+    box.innerHTML = ''
+      + syllabusRow(ja ? "授業名" : "Course", ja ? c.name : c.nameEn)
+      + syllabusRow(ja ? "担当教員" : "Instructor", ja ? "京大 太郎 教授" : "Prof. Taro Kyodai")
+      + syllabusRow(ja ? "開講期" : "Term", ja ? "2026年度 前期" : "AY 2026 Spring")
+      + syllabusRow(ja ? "曜時限" : "Day/Period", (ja ? dayName + "曜" + c.period + "限" : ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][c.day] + " " + c.period))
+      + syllabusRow(ja ? "単位" : "Credits", "2")
+      + syllabusRow(ja ? "教室" : "Room", "工学部総合校舎 305")
+      + '<div class="syllabus-section"><div class="syllabus-section-title">' + (ja ? "授業の目的・概要" : "Purpose / Outline") + '</div>'
+      + '<div class="syllabus-section-body">' + escHtml(ja ? "本講義では" + c.name + "の基礎を学び、応用への足がかりを身につける。" : "This course covers fundamentals of " + c.nameEn + " with practical applications.") + '</div></div>'
+      + '<div class="syllabus-section"><div class="syllabus-section-title">' + (ja ? "成績評価" : "Grading") + '</div>'
+      + '<div class="syllabus-section-body">' + escHtml(ja ? "中間試験 30%、期末試験 50%、課題 20%。" : "Midterm 30%, Final 50%, Assignments 20%.") + '</div></div>';
+    body.appendChild(box);
+  }
+  function syllabusRow(label, val) {
+    return '<div class="syllabus-row"><span class="label">' + escHtml(label) + '</span><span class="val">' + escHtml(val) + '</span></div>';
+  }
+
+  // ============== Top-level wiring ==============
+  function applyAll() {
+    applySettings();
+    renderTopFavbar();
+    renderSidebar();
+    renderMainPage();
+    updateBreadcrumb();
+    buildTabBar();
+    renderActiveView();
+  }
+
+  document.getElementById("kulms-assign-toggle").addEventListener("click", togglePanel);
+  document.getElementById("closeBtn").addEventListener("click", closePanel);
+  document.getElementById("panelOverlay").addEventListener("click", closePanel);
+
+  // Home navigation: logo block & "ホーム" breadcrumb
+  var bcHome = document.getElementById("breadcrumbHome");
+  if (bcHome) bcHome.addEventListener("click", function () { navigateTo({ type: "home" }); });
+  var logoBlock = document.querySelector(".lms-logo-block .lms-logo");
+  if (logoBlock) {
+    logoBlock.style.cursor = "pointer";
+    logoBlock.addEventListener("click", function () { navigateTo({ type: "home" }); });
+  }
+  document.getElementById("refreshBtn").addEventListener("click", function () {
+    var btn = document.getElementById("refreshBtn");
+    btn.classList.add("spinning");
+    setTimeout(function () {
+      btn.classList.remove("spinning");
+      openTime = Date.now();
+      renderActiveView();
+      showToast(t("lastUpdatedNow"));
+    }, 600);
+  });
+  function toggleSidebar() {
+    var sb = document.getElementById("lmsSidebar");
+    var arr = document.getElementById("sbArrow");
+    sb.classList.toggle("open");
+    arr.classList.toggle("open");
+    state.sidebarOpen = sb.classList.contains("open");
+    saveState();
+  }
+  document.getElementById("sidebarToggleBtn").addEventListener("click", toggleSidebar);
+  var headerSbToggle = document.getElementById("sidebarToggleBtn2");
+  if (headerSbToggle) headerSbToggle.addEventListener("click", toggleSidebar);
+
+  // Initial render
+  applyAll();
+  if (state.sidebarOpen) {
+    document.getElementById("lmsSidebar").classList.add("open");
+    document.getElementById("sbArrow").classList.add("open");
+  }
+
+  // First-run only: auto-open the KULMS+ panel after 1.5s so reviewers can see it
+  // After first run, respect the user's last open/close choice
+  if (!localStorage.getItem("kulms-demo-seen-panel")) {
+    setTimeout(function () {
+      if (!panelEl.classList.contains("open")) openPanel();
+      localStorage.setItem("kulms-demo-seen-panel", "1");
+    }, 1500);
+  } else if (state.panelOpen) {
+    setTimeout(function () { openPanel(); }, 200);
+  }
+})();
 </script>
-
 </body>
 </html>

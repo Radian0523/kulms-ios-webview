@@ -37,9 +37,9 @@ enum ContentScriptInjector {
             addScript(controller, source: shimJS, mainFrameOnly: false)
         }
 
-        // 3. アプリバージョンを埋め込み
+        // 3. アプリバージョン・プラットフォームを埋め込み
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
-        addScript(controller, source: "window.__kulmsAppVersion = '\(version)';", mainFrameOnly: false)
+        addScript(controller, source: "window.__kulmsAppVersion = '\(version)'; window.__kulmsPlatform = 'ios';", mainFrameOnly: false)
 
         // 4. ロケールデータ埋め込み（LMS のみ）
         let localeJS = hostGuardOpen + buildLocaleDataScript() + hostGuardClose
