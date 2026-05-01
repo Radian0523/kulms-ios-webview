@@ -41,23 +41,18 @@ struct LMSWebView: View {
                 Spacer()
 
                 Button {
-                    showLogoutConfirm = true
+                    showSettings = true
                 } label: {
-                    Text(String(localized: "logout"))
-                        .font(.caption)
+                    Image(systemName: "bell")
+                        .font(.body.weight(.medium))
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .background(.bar)
         }
-        .alert(String(localized: "logoutConfirm"), isPresented: $showLogoutConfirm) {
-            Button(String(localized: "logout"), role: .destructive) {
-                logout()
-            }
-            Button(String(localized: "cancel"), role: .cancel) {}
-        } message: {
-            Text(String(localized: "logoutConfirmBody"))
+        .sheet(isPresented: $showSettings) {
+            SettingsView(onLogout: logout)
         }
         .onAppear {
             startObserving()
@@ -75,7 +70,7 @@ struct LMSWebView: View {
 
     @State private var canGoBack = false
     @State private var canGoForward = false
-    @State private var showLogoutConfirm = false
+    @State private var showSettings = false
     @State private var hasInitiallyLoaded = false
     @State private var backObserver: NSKeyValueObservation?
     @State private var forwardObserver: NSKeyValueObservation?

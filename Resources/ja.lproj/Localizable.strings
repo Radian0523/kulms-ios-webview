@@ -47,6 +47,14 @@
 "assignmentCount" = "課題数";
 "sendFeedback" = "ご意見・要望を送る";
 "homepage" = "ホームページ";
+/* Settings (WebView) */
+"settingsTitle" = "設定";
+"securitySectionTitle" = "セキュリティについて";
+"securityDescription" = "ECS-ID とパスワードは、アプリ内の WebView を通じて京都大学の認証サーバー（auth.iimc.kyoto-u.ac.jp）に直接送信されます。KULMS+ の開発者のサーバーに認証情報が送信されることはありません。\n\nパスワードを端末に保存する場合、iOS では Keychain により保護されます。\n\nこのアプリのソースコードは GitHub で公開しており、認証情報の取り扱いをどなたでもご確認いただけます。";
+"appInfoSection" = "アプリ情報";
+"version" = "バージョン";
+"sourceCode" = "ソースコード";
+
 "logout" = "ログアウト";
 "logoutConfirm" = "ログアウトしますか？";
 "logoutConfirmBody" = "セッションとキャッシュが削除されます";
@@ -71,6 +79,9 @@
 "offsetMins" = "%d分";
 
 /* Notification content */
+"notifyNewAssignment" = "新着課題の通知";
+"notifNewAssignmentTitle" = "新しい課題";
+"notifNewAssignmentBody" = "「%@」（%@）が追加されました";
 "notifTitleSoon" = "課題の締切まもなく";
 "notifTitleApproaching" = "課題の締切が近づいています";
 "notifBody" = "「%@」（%@）の締切まで%@";

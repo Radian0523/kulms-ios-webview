@@ -6,6 +6,8 @@ final class NotificationService {
     private static let maxPendingNotifications = 64
     private static let defaultOffsets = [1440, 60] // 24h, 1h (minutes)
     private static let offsetsKey = "notificationOffsets"
+    private static let newAssignmentKey = "newAssignmentNotification"
+    private static let knownKeysKey = "knownAssignmentKeys"
 
     private init() {}
 
@@ -29,6 +31,44 @@ final class NotificationService {
         return offsets
     }
 
+    static func saveNotificationOffsets(_ offsets: [Int]) {
+        let data = try? JSONEncoder().encode(offsets)
+        UserDefaults.standard.set(data, forKey: offsetsKey)
+    }
+
+    // MARK: - New Assignment Notification
+
+    static func loadNewAssignmentNotification() -> Bool {
+        UserDefaults.standard.object(forKey: newAssignmentKey) as? Bool ?? true
+    }
+
+    static func saveNewAssignmentNotification(_ enabled: Bool) {
+        UserDefaults.standard.set(enabled, forKey: newAssignmentKey)
+    }
+
+    private static func loadKnownAssignmentKeys() -> Set<String> {
+        guard let data = UserDefaults.standard.data(forKey: knownKeysKey),
+              let keys = try? JSONDecoder().decode(Set<String>.self, from: data) else {
+            return []
+        }
+        return keys
+    }
+
+    private static func saveKnownAssignmentKeys(_ keys: Set<String>) {
+        let data = try? JSONEncoder().encode(keys)
+        UserDefaults.standard.set(data, forKey: knownKeysKey)
+    }
+
+    static func formatOffsetLabelBefore(_ minutes: Int) -> String {
+        if minutes >= 1440 && minutes % 1440 == 0 {
+            return String(format: String(localized: "offsetDaysBefore"), minutes / 1440)
+        } else if minutes >= 60 && minutes % 60 == 0 {
+            return String(format: String(localized: "offsetHoursBefore"), minutes / 60)
+        } else {
+            return String(format: String(localized: "offsetMinsBefore"), minutes)
+        }
+    }
+
     // MARK: - Schedule from Extension Data
 
     /// 拡張機能から受け取った課題辞書配列から通知をスケジュールする。
@@ -48,6 +88,8 @@ final class NotificationService {
 
         let offsets = Self.loadNotificationOffsets()
         let now = Date.now
+        let notifyNew = Self.loadNewAssignmentNotification()
+        let knownKeys = Self.loadKnownAssignmentKeys()
 
         struct NotificationCandidate {
             let id: String
@@ -58,6 +100,7 @@ final class NotificationService {
         }
 
         var candidates: [NotificationCandidate] = []
+        var currentKeys = Set<String>()
 
         for assignment in assignments {
             // 締切がない課題はスキップ
@@ -98,6 +141,28 @@ final class NotificationService {
             let courseName = assignment["courseName"] as? String ?? ""
             let url = "https://lms.gakusei.kyoto-u.ac.jp/portal/site/\(courseId)"
 
+            currentKeys.insert(compositeKey)
+
+            // 新着課題の即時通知
+            if notifyNew && !knownKeys.isEmpty && !knownKeys.contains(compositeKey) {
+                let content = UNMutableNotificationContent()
+                content.title = String(localized: "notifNewAssignmentTitle")
+                content.body = String(
+                    format: String(localized: "notifNewAssignmentBody"),
+                    name, courseName
+                )
+                content.sound = .default
+                content.userInfo = ["targetUrl": url]
+
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+                let request = UNNotificationRequest(
+                    identifier: "kulms-new-\(compositeKey)",
+                    content: content,
+                    trigger: trigger
+                )
+                try? await center.add(request)
+            }
+
             for offset in offsets {
                 let date = deadline.addingTimeInterval(-Double(offset) * 60)
                 guard date > now else { continue }
@@ -122,6 +187,11 @@ final class NotificationService {
                     url: url
                 ))
             }
+        }
+
+        // 既知の課題キーを更新
+        if !currentKeys.isEmpty {
+            Self.saveKnownAssignmentKeys(currentKeys)
         }
 
         // 日付順（最も近い順）でソートし、64 件に制限

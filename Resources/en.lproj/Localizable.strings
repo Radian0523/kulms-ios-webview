@@ -47,6 +47,14 @@
 "assignmentCount" = "Assignments";
 "sendFeedback" = "Send feedback";
 "homepage" = "Homepage";
+/* Settings (WebView) */
+"settingsTitle" = "Settings";
+"securitySectionTitle" = "About Security";
+"securityDescription" = "Your ECS-ID and password are sent directly to Kyoto University's authentication server (auth.iimc.kyoto-u.ac.jp) through the in-app WebView. Your credentials are never sent to the KULMS+ developer's server.\n\nIf you save your password on this device, it is protected by the iOS Keychain.\n\nThe source code for this app is available on GitHub, so anyone can verify how credentials are handled.";
+"appInfoSection" = "App Info";
+"version" = "Version";
+"sourceCode" = "Source Code";
+
 "logout" = "Log out";
 "logoutConfirm" = "Log out?";
 "logoutConfirmBody" = "Session and cache will be deleted";
@@ -71,6 +79,9 @@
 "offsetMins" = "%d min";
 
 /* Notification content */
+"notifyNewAssignment" = "New assignment notifications";
+"notifNewAssignmentTitle" = "New Assignment";
+"notifNewAssignmentBody" = "\"%@\" (%@) was added";
 "notifTitleSoon" = "Assignment deadline approaching";
 "notifTitleApproaching" = "Assignment deadline is near";
 "notifBody" = "\"%@\" (%@) — %@ until deadline";
