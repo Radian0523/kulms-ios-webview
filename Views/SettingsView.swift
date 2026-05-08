@@ -49,6 +49,7 @@ struct SettingsView: View {
                             Label(String(localized: "addTiming"), systemImage: "plus")
                         }
                     }
+
                 }
 
                 // MARK: - Security

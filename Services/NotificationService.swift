@@ -1,7 +1,9 @@
 import Foundation
+import os.log
 import UserNotifications
 
 final class NotificationService {
+    private static let log = Logger(subsystem: "com.radian0523.kulms-plus-for-ios", category: "Notification")
     static let shared = NotificationService()
     private static let maxPendingNotifications = 64
     private static let defaultOffsets = [1440, 60] // 24h, 1h (minutes)
@@ -80,16 +82,24 @@ final class NotificationService {
         assignments: [[String: Any]],
         checkedState: [String: Any]
     ) async {
+        Self.log.info("scheduleFromExtensionData called: \(assignments.count) assignments, \(checkedState.count) checked")
+
         let center = UNUserNotificationCenter.current()
         center.removeAllPendingNotificationRequests()
 
         let settings = await center.notificationSettings()
-        guard settings.authorizationStatus == .authorized else { return }
+        Self.log.info("authorizationStatus = \(String(describing: settings.authorizationStatus.rawValue))")
+        guard settings.authorizationStatus == .authorized else {
+            Self.log.warning("notifications not authorized — aborting schedule")
+            return
+        }
 
         let offsets = Self.loadNotificationOffsets()
+        Self.log.info("offsets = \(offsets)")
         let now = Date.now
         let notifyNew = Self.loadNewAssignmentNotification()
         let knownKeys = Self.loadKnownAssignmentKeys()
+        Self.log.info("notifyNew=\(notifyNew), knownKeys count=\(knownKeys.count)")
 
         struct NotificationCandidate {
             let id: String
@@ -102,23 +112,34 @@ final class NotificationService {
         var candidates: [NotificationCandidate] = []
         var currentKeys = Set<String>()
 
+        var skippedNoDeadline = 0, skippedPast = 0, skippedSubmitted = 0, skippedChecked = 0
+
         for assignment in assignments {
+            let name = assignment["name"] as? String ?? ""
             // 締切がない課題はスキップ
             guard let deadlineMs = assignment["deadline"] as? Double,
-                  deadlineMs > 0 else { continue }
+                  deadlineMs > 0 else {
+                skippedNoDeadline += 1
+                continue
+            }
             let deadline = Date(timeIntervalSince1970: deadlineMs / 1000.0)
 
             // 過去の締切はスキップ
-            guard deadline > now else { continue }
+            guard deadline > now else {
+                skippedPast += 1
+                continue
+            }
 
             // 提出済の課題はスキップ
             let status = assignment["status"] as? String ?? ""
-            if !status.isEmpty { continue }
+            if !status.isEmpty {
+                skippedSubmitted += 1
+                continue
+            }
 
             // compositeKey を生成
             let entityId = assignment["entityId"] as? String ?? ""
             let courseId = assignment["courseId"] as? String ?? ""
-            let name = assignment["name"] as? String ?? ""
             let compositeKey = entityId.isEmpty ? "\(courseId):\(name)" : entityId
 
             // チェック済の課題はスキップ（値が truthy かつ "active" でなければスキップ）
@@ -134,12 +155,14 @@ final class NotificationService {
                     isTruthy = true
                 }
                 if isTruthy && "\(checkedValue)" != "active" {
+                    skippedChecked += 1
                     continue
                 }
             }
 
             let courseName = assignment["courseName"] as? String ?? ""
-            let url = "https://lms.gakusei.kyoto-u.ac.jp/portal/site/\(courseId)"
+            let url = assignment["url"] as? String
+                ?? "https://lms.gakusei.kyoto-u.ac.jp/portal/site/\(courseId)"
 
             currentKeys.insert(compositeKey)
 
@@ -189,6 +212,8 @@ final class NotificationService {
             }
         }
 
+        Self.log.info("filter results — noDeadline:\(skippedNoDeadline) past:\(skippedPast) submitted:\(skippedSubmitted) checked:\(skippedChecked) → candidates:\(candidates.count)")
+
         // 既知の課題キーを更新
         if !currentKeys.isEmpty {
             Self.saveKnownAssignmentKeys(currentKeys)
@@ -196,9 +221,17 @@ final class NotificationService {
 
         // 日付順（最も近い順）でソートし、64 件に制限
         candidates.sort { $0.date < $1.date }
-        for candidate in candidates.prefix(Self.maxPendingNotifications) {
+        let scheduled = Array(candidates.prefix(Self.maxPendingNotifications))
+        for candidate in scheduled {
             schedule(id: candidate.id, title: candidate.title,
                      body: candidate.body, date: candidate.date, url: candidate.url)
+        }
+
+        // スケジュール後のペンディング通知数を確認
+        let pending = await center.pendingNotificationRequests()
+        Self.log.info("scheduling done — requested:\(scheduled.count), pending in system:\(pending.count)")
+        for p in pending.prefix(5) {
+            Self.log.info("  pending: \(p.identifier) trigger=\(String(describing: p.trigger))")
         }
     }
 
@@ -232,6 +265,10 @@ final class NotificationService {
         let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
         let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
 
-        UNUserNotificationCenter.current().add(request)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                Self.log.error("failed to add notification \(id): \(error.localizedDescription)")
+            }
+        }
     }
 }
