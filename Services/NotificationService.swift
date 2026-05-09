@@ -11,6 +11,10 @@ final class NotificationService {
     private static let newAssignmentKey = "newAssignmentNotification"
     private static let knownKeysKey = "knownAssignmentKeys"
 
+    /// scheduleFromExtensionData の並行実行を防ぐためのロック
+    private let scheduleLock = NSLock()
+    private var scheduleTask: Task<Void, Never>?
+
     private init() {}
 
     func requestPermission() async -> Bool {
@@ -78,14 +82,26 @@ final class NotificationService {
     /// - Parameters:
     ///   - assignments: 課題辞書の配列（拡張機能の assignments.js が生成）
     ///   - checkedState: kulms-checked-assignments の辞書
+    /// 呼び出しをキューイングし、最後の呼び出しだけを実行する。
     func scheduleFromExtensionData(
         assignments: [[String: Any]],
         checkedState: [String: Any]
+    ) {
+        scheduleLock.lock()
+        scheduleTask?.cancel()
+        scheduleTask = Task { [weak self] in
+            await self?.doSchedule(assignments: assignments, checkedState: checkedState)
+        }
+        scheduleLock.unlock()
+    }
+
+    private func doSchedule(
+        assignments: [[String: Any]],
+        checkedState: [String: Any]
     ) async {
-        Self.log.info("scheduleFromExtensionData called: \(assignments.count) assignments, \(checkedState.count) checked")
+        Self.log.info("doSchedule called: \(assignments.count) assignments, \(checkedState.count) checked")
 
         let center = UNUserNotificationCenter.current()
-        center.removeAllPendingNotificationRequests()
 
         let settings = await center.notificationSettings()
         Self.log.info("authorizationStatus = \(String(describing: settings.authorizationStatus.rawValue))")
@@ -111,6 +127,7 @@ final class NotificationService {
 
         var candidates: [NotificationCandidate] = []
         var currentKeys = Set<String>()
+        var newAssignmentRequests: [UNNotificationRequest] = []
 
         var skippedNoDeadline = 0, skippedPast = 0, skippedSubmitted = 0, skippedChecked = 0
 
@@ -166,7 +183,7 @@ final class NotificationService {
 
             currentKeys.insert(compositeKey)
 
-            // 新着課題の即時通知
+            // 新着課題の即時通知（後でまとめて登録）
             if notifyNew && !knownKeys.isEmpty && !knownKeys.contains(compositeKey) {
                 let content = UNMutableNotificationContent()
                 content.title = String(localized: "notifNewAssignmentTitle")
@@ -178,12 +195,11 @@ final class NotificationService {
                 content.userInfo = ["targetUrl": url]
 
                 let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-                let request = UNNotificationRequest(
+                newAssignmentRequests.append(UNNotificationRequest(
                     identifier: "kulms-new-\(compositeKey)",
                     content: content,
                     trigger: trigger
-                )
-                try? await center.add(request)
+                ))
             }
 
             for offset in offsets {
@@ -212,6 +228,12 @@ final class NotificationService {
             }
         }
 
+        // キャンセルされていたら中断
+        guard !Task.isCancelled else {
+            Self.log.info("schedule cancelled (superseded by newer call)")
+            return
+        }
+
         Self.log.info("filter results — noDeadline:\(skippedNoDeadline) past:\(skippedPast) submitted:\(skippedSubmitted) checked:\(skippedChecked) → candidates:\(candidates.count)")
 
         // 既知の課題キーを更新
@@ -219,9 +241,15 @@ final class NotificationService {
             Self.saveKnownAssignmentKeys(currentKeys)
         }
 
-        // 日付順（最も近い順）でソートし、64 件に制限
+        // 候補が揃ってから一括で削除→登録（通知ゼロの窓を最小化）
         candidates.sort { $0.date < $1.date }
         let scheduled = Array(candidates.prefix(Self.maxPendingNotifications))
+
+        center.removeAllPendingNotificationRequests()
+
+        for request in newAssignmentRequests {
+            try? await center.add(request)
+        }
         for candidate in scheduled {
             schedule(id: candidate.id, title: candidate.title,
                      body: candidate.body, date: candidate.date, url: candidate.url)

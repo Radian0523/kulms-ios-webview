@@ -71,12 +71,10 @@ final class KulmsStorageHandler: NSObject, WKScriptMessageHandler {
             if let data = store["kulms-assignments"] as? [String: Any],
                let assignments = data["assignments"] as? [[String: Any]] {
                 let checked = store["kulms-checked-assignments"] as? [String: Any] ?? [:]
-                Task {
-                    await NotificationService.shared.scheduleFromExtensionData(
-                        assignments: assignments,
-                        checkedState: checked
-                    )
-                }
+                NotificationService.shared.scheduleFromExtensionData(
+                    assignments: assignments,
+                    checkedState: checked
+                )
             }
         }
     }
