@@ -34,6 +34,8 @@ targets:
         buildPhase: resources
       - path: ../kulms-extension/src/submit-detect.js
         buildPhase: resources
+      - path: ../kulms-extension/src/file-drop.js
+        buildPhase: resources
       - path: ../kulms-extension/src/tree-view.js
         buildPhase: resources
       - path: ../kulms-extension/src/course-name.js
@@ -75,8 +77,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.radian0523.kulms-plus-for-ios
         PRODUCT_NAME: KULMS
         INFOPLIST_KEY_CFBundleDisplayName: "KULMS+"
-        MARKETING_VERSION: "2.4.0"
-        CURRENT_PROJECT_VERSION: "16"
+        MARKETING_VERSION: "2.5.0"
+        CURRENT_PROJECT_VERSION: "17"
         DEVELOPMENT_TEAM: ""
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
