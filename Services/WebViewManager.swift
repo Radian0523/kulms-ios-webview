@@ -24,6 +24,7 @@ class WebViewManager: NSObject {
     private var navigationListeners: [(URL) -> Void] = []
     private var storageHandler: KulmsStorageHandler?
     private var pendingDownloadURL: URL?
+    private var modalDownloadVC: UIViewController?
     private var documentInteractionController: UIDocumentInteractionController?
 
     /// セッション切れ検知コールバック。
@@ -376,11 +377,18 @@ extension WebViewManager: WKDownloadDelegate {
     func downloadDidFinish(_ download: WKDownload) {
         guard let url = pendingDownloadURL else { return }
         pendingDownloadURL = nil
-        presentPreview(for: url)
+
+        if let modalVC = modalDownloadVC {
+            modalDownloadVC = nil
+            presentShareSheet(for: url, from: modalVC)
+        } else {
+            presentPreview(for: url)
+        }
     }
 
     func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
         pendingDownloadURL = nil
+        modalDownloadVC = nil
     }
 }
 
@@ -416,8 +424,12 @@ extension WebViewManager {
         vc.navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "arrow.down.circle"),
             primaryAction: UIAction { [weak self, weak modalWebView, weak vc] _ in
-                guard let self, let currentURL = modalWebView?.url, let vc else { return }
-                Task { await self.downloadAndShare(url: currentURL, from: vc) }
+                guard let self, let modalWebView, let currentURL = modalWebView.url, let vc else { return }
+                self.modalDownloadVC = vc
+                Task {
+                    let download = await modalWebView.startDownload(using: URLRequest(url: currentURL))
+                    download.delegate = self
+                }
             }
         )
 
@@ -425,36 +437,13 @@ extension WebViewManager {
         modalWebView.load(URLRequest(url: url))
     }
 
-    /// モーダル内のファイルをダウンロードして UIActivityViewController で共有する。
-    /// モーダル WebView 経由で認証済みのため、同じ Cookie で URLSession が通る。
-    private func downloadAndShare(url: URL, from vc: UIViewController) async {
-        var request = URLRequest(url: url)
-        let cookies = await webView.configuration.websiteDataStore.httpCookieStore.allCookies()
-        let cookieHeader = cookies.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
-        if !cookieHeader.isEmpty {
-            request.setValue(cookieHeader, forHTTPHeaderField: "Cookie")
+    /// ダウンロード完了後に UIActivityViewController で共有する。
+    private func presentShareSheet(for fileURL: URL, from vc: UIViewController) {
+        let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+        if let popover = activityVC.popoverPresentationController {
+            popover.barButtonItem = vc.navigationItem.rightBarButtonItem
         }
-        do {
-            let (tempURL, response) = try await URLSession.shared.download(for: request)
-            var filename = response.suggestedFilename
-                ?? (url.lastPathComponent.isEmpty ? "download" : url.lastPathComponent)
-            if let mimeType = response.mimeType,
-               let ext = Self.extensionForMimeType(mimeType),
-               !filename.lowercased().hasSuffix(".\(ext)") {
-                filename += ".\(ext)"
-            }
-            let destURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent(filename)
-            try? FileManager.default.removeItem(at: destURL)
-            try FileManager.default.moveItem(at: tempURL, to: destURL)
-            let activityVC = UIActivityViewController(activityItems: [destURL], applicationActivities: nil)
-            if let popover = activityVC.popoverPresentationController {
-                popover.barButtonItem = vc.navigationItem.rightBarButtonItem
-            }
-            vc.present(activityVC, animated: true)
-        } catch {
-            print("[KULMS] Download for share failed: \(error)")
-        }
+        vc.present(activityVC, animated: true)
     }
 
     private static func extensionForMimeType(_ mimeType: String) -> String? {

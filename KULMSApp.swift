@@ -62,7 +62,24 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        QuickActionService.updateQuickActions()
         return true
+    }
+
+    // Quick Action (ホーム画面長押し) タップ時
+    func application(
+        _ application: UIApplication,
+        performActionFor shortcutItem: UIApplicationShortcutItem,
+        completionHandler: @escaping (Bool) -> Void
+    ) {
+        if let url = shortcutItem.userInfo?["url"] as? String, !url.isEmpty {
+            DispatchQueue.main.async {
+                WebViewManager.shared.navigate(to: url)
+            }
+            completionHandler(true)
+        } else {
+            completionHandler(false)
+        }
     }
 
     // フォアグラウンドで通知を表示

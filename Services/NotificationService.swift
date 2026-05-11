@@ -241,25 +241,81 @@ final class NotificationService {
             Self.saveKnownAssignmentKeys(currentKeys)
         }
 
-        // 候補が揃ってから一括で削除→登録（通知ゼロの窓を最小化）
+        // 候補をソートし上限を適用
         candidates.sort { $0.date < $1.date }
         let scheduled = Array(candidates.prefix(Self.maxPendingNotifications))
 
-        center.removeAllPendingNotificationRequests()
+        // --- 通知登録（removeAll を使わず、add → stale 削除の順で行う） ---
+        // removeAllPendingNotificationRequests() は非同期で secondary thread で実行されるため、
+        // 直後の add() とレースが発生し、追加した通知が削除される可能性がある。
+        // 代わりに：
+        //   1. 新しい通知を先に add（同一 ID は自動で上書き）
+        //   2. 不要になった古い通知だけを ID 指定で削除
 
+        // Step 1: 新着課題の即時通知
         for request in newAssignmentRequests {
-            try? await center.add(request)
-        }
-        for candidate in scheduled {
-            schedule(id: candidate.id, title: candidate.title,
-                     body: candidate.body, date: candidate.date, url: candidate.url)
+            do {
+                try await center.add(request)
+            } catch {
+                Self.log.error("failed to add new-assignment notification: \(error.localizedDescription)")
+            }
         }
 
-        // スケジュール後のペンディング通知数を確認
+        // Step 2: 締切通知を UNTimeIntervalNotificationTrigger で登録
+        // UNCalendarNotificationTrigger は秒を含まないため、同一分内のタイミングで
+        // トリガー時刻が過去になるケースがあった。TimeInterval なら確実。
+        var addedIds = Set<String>()
+        for candidate in scheduled {
+            let interval = candidate.date.timeIntervalSinceNow
+            guard interval > 0 else {
+                Self.log.info("skipping \(candidate.id): interval \(interval)s <= 0")
+                continue
+            }
+
+            let content = UNMutableNotificationContent()
+            content.title = candidate.title
+            content.body = candidate.body
+            content.sound = .default
+            if !candidate.url.isEmpty {
+                content.userInfo = ["targetUrl": candidate.url]
+            }
+
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+            let request = UNNotificationRequest(identifier: candidate.id, content: content, trigger: trigger)
+            do {
+                try await center.add(request)
+                addedIds.insert(candidate.id)
+            } catch {
+                Self.log.error("failed to add \(candidate.id): \(error.localizedDescription)")
+            }
+        }
+
+        Self.log.info("added \(addedIds.count) deadline notifications")
+
+        // Step 3: 古い kulms- 通知で今回のバッチに含まれないものを削除
         let pending = await center.pendingNotificationRequests()
-        Self.log.info("scheduling done — requested:\(scheduled.count), pending in system:\(pending.count)")
-        for p in pending.prefix(5) {
-            Self.log.info("  pending: \(p.identifier) trigger=\(String(describing: p.trigger))")
+        let newAssignmentIds = Set(newAssignmentRequests.map { $0.identifier })
+        let staleIds = pending
+            .map { $0.identifier }
+            .filter { id in
+                id.hasPrefix("kulms-")
+                    && !addedIds.contains(id)
+                    && !newAssignmentIds.contains(id)
+            }
+        if !staleIds.isEmpty {
+            center.removePendingNotificationRequests(withIdentifiers: staleIds)
+            Self.log.info("removed \(staleIds.count) stale notifications")
+        }
+
+        let finalPending = await center.pendingNotificationRequests()
+        Self.log.info("scheduling done — added:\(addedIds.count), stale removed:\(staleIds.count), pending in system:\(finalPending.count)")
+        for p in finalPending.prefix(5) {
+            if let trigger = p.trigger as? UNTimeIntervalNotificationTrigger {
+                let fireDate = trigger.nextTriggerDate()
+                Self.log.info("  pending: \(p.identifier) fires=\(String(describing: fireDate))")
+            } else {
+                Self.log.info("  pending: \(p.identifier) trigger=\(String(describing: p.trigger))")
+            }
         }
     }
 
@@ -272,31 +328,6 @@ final class NotificationService {
             return String(format: String(localized: "offsetHours"), minutes / 60)
         } else {
             return String(format: String(localized: "offsetMins"), minutes)
-        }
-    }
-
-    private func schedule(id: String, title: String, body: String, date: Date, url: String = "") {
-        guard date > .now else { return }
-
-        let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = body
-        content.sound = .default
-        if !url.isEmpty {
-            content.userInfo = ["targetUrl": url]
-        }
-
-        let comps = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute],
-            from: date
-        )
-        let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
-        let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error {
-                Self.log.error("failed to add notification \(id): \(error.localizedDescription)")
-            }
         }
     }
 }

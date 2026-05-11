@@ -66,7 +66,7 @@ final class KulmsStorageHandler: NSObject, WKScriptMessageHandler {
         saveStore(store)
         sendCallback(callbackId: callbackId, data: [:])
 
-        // 課題データ更新時に通知をスケジュール
+        // 課題データ更新時に通知をスケジュール & Quick Actions を更新
         if items["kulms-assignments"] != nil || items["kulms-checked-assignments"] != nil {
             if let data = store["kulms-assignments"] as? [String: Any],
                let assignments = data["assignments"] as? [[String: Any]] {
@@ -76,6 +76,7 @@ final class KulmsStorageHandler: NSObject, WKScriptMessageHandler {
                     checkedState: checked
                 )
             }
+            QuickActionService.updateQuickActions()
         }
     }
 
