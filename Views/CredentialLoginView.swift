@@ -6,6 +6,7 @@ struct CredentialLoginView: View {
     @EnvironmentObject private var appState: AppState
 
     let onRequireWebViewLogin: () -> Void
+    @Binding var didAutoLogin: Bool
 
     @State private var username = ""
     @State private var password = ""
@@ -13,7 +14,9 @@ struct CredentialLoginView: View {
     @State private var passwordVisible = false
     @State private var isSubmitting = false
     @State private var errorText: String?
-    @State private var didAutoLogin = false
+    @State private var totpSecret = ""
+    @State private var hasTotpSecret = CredentialStore.loadTotpSecret() != nil
+    @State private var showTotpInvalidAlert = false
     @State private var showDemoLogin = false
     @State private var demoUsername = ""
     @State private var demoPassword = ""
@@ -158,6 +161,57 @@ struct CredentialLoginView: View {
 
                 Divider().padding(.vertical, 16)
 
+                // TOTP settings
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(String(localized: "totpSectionTitle"))
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+
+                    if hasTotpSecret {
+                        HStack {
+                            Label(String(localized: "totpConfigured"), systemImage: "checkmark.shield.fill")
+                                .foregroundStyle(.green)
+                                .font(.subheadline)
+                            Spacer()
+                            Button(String(localized: "totpDelete"), role: .destructive) {
+                                CredentialStore.clearTotpSecret()
+                                hasTotpSecret = false
+                                totpSecret = ""
+                            }
+                            .font(.subheadline)
+                        }
+                    } else {
+                        Text(String(localized: "totpDescription"))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        HStack {
+                            TextField(String(localized: "totpPlaceholder"), text: $totpSecret)
+                                .textInputAutocapitalization(.characters)
+                                .autocorrectionDisabled()
+                                .font(.system(.body, design: .monospaced))
+                                .padding(10)
+                                .background(Color(.secondarySystemBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            Button(String(localized: "totpSave")) {
+                                let cleaned = totpSecret
+                                    .replacingOccurrences(of: " ", with: "")
+                                    .replacingOccurrences(of: "-", with: "")
+                                if TOTPGenerator.isValidBase32(cleaned) {
+                                    CredentialStore.saveTotpSecret(cleaned)
+                                    hasTotpSecret = true
+                                    totpSecret = ""
+                                } else {
+                                    showTotpInvalidAlert = true
+                                }
+                            }
+                            .disabled(totpSecret.trimmingCharacters(in: .whitespaces).isEmpty)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Divider().padding(.vertical, 16)
+
                 Button {
                     demoUsername = ""
                     demoPassword = ""
@@ -209,6 +263,11 @@ struct CredentialLoginView: View {
                 showDemoLogin = true
                 demoError = false
             }
+        }
+        .alert(String(localized: "totpInvalidTitle"), isPresented: $showTotpInvalidAlert) {
+            Button(String(localized: "close"), role: .cancel) {}
+        } message: {
+            Text(String(localized: "totpInvalidMessage"))
         }
     }
 

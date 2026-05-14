@@ -50,10 +50,20 @@
 /* Settings (WebView) */
 "settingsTitle" = "Settings";
 "securitySectionTitle" = "About Security";
-"securityDescription" = "Your ECS-ID and password are sent directly to Kyoto University's authentication server (auth.iimc.kyoto-u.ac.jp) through the in-app WebView. Your credentials are never sent to the KULMS+ developer's server.\n\nIf you save your password on this device, it is protected by the iOS Keychain.\n\nThe source code for this app is available on GitHub, so anyone can verify how credentials are handled.";
+"securityDescription" = "Your ECS-ID and password are sent directly to Kyoto University's authentication server (auth.iimc.kyoto-u.ac.jp) through the in-app WebView. Your credentials are never sent to the KULMS+ developer's server.\n\nIf you save your password on this device, it is encrypted and protected by the iOS Keychain. Your TOTP secret key is also stored in the Keychain.\n\nNote: Storing both your password and TOTP secret on the same device means both authentication factors are on one device. For maximum security, consider using a separate authenticator app (e.g. Google Authenticator) on another device.\n\nThe source code for this app is available on GitHub, so anyone can verify how credentials are handled.";
 "appInfoSection" = "App Info";
 "version" = "Version";
 "sourceCode" = "Source Code";
+
+/* TOTP */
+"totpSectionTitle" = "Two-Factor Auth (TOTP)";
+"totpConfigured" = "Configured";
+"totpDelete" = "Delete";
+"totpSave" = "Save";
+"totpDescription" = "Set a TOTP secret key to auto-fill OTP codes during login.";
+"totpPlaceholder" = "Base32 secret key";
+"totpInvalidTitle" = "Invalid Secret";
+"totpInvalidMessage" = "Please enter a valid Base32 secret key.";
 
 "logout" = "Log out";
 "logoutConfirm" = "Log out?";

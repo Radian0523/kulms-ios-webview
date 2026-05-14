@@ -7,6 +7,7 @@ WKWebView ベースで [kulms-extension](https://github.com/Radian0523/kulms-ext
 
 - LMS の WKWebView 表示 + 拡張機能スクリプト注入
 - ECS-ID / SPS-ID によるログイン（パスキー / 多要素認証対応）
+- TOTP 自動入力（シークレットキーを登録すると OTP を自動入力）
 - 課題の締切通知（タイミングカスタマイズ対応）
 - 新着課題の即時通知
 - ホーム画面クイックアクション（アイコン長押しで課題表示）

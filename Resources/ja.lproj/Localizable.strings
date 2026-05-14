@@ -50,10 +50,20 @@
 /* Settings (WebView) */
 "settingsTitle" = "設定";
 "securitySectionTitle" = "セキュリティについて";
-"securityDescription" = "ECS-ID とパスワードは、アプリ内の WebView を通じて京都大学の認証サーバー（auth.iimc.kyoto-u.ac.jp）に直接送信されます。KULMS+ の開発者のサーバーに認証情報が送信されることはありません。\n\nパスワードを端末に保存する場合、iOS では Keychain により保護されます。\n\nこのアプリのソースコードは GitHub で公開しており、認証情報の取り扱いをどなたでもご確認いただけます。";
+"securityDescription" = "ECS-ID とパスワードは、アプリ内の WebView を通じて京都大学の認証サーバー（auth.iimc.kyoto-u.ac.jp）に直接送信されます。KULMS+ の開発者のサーバーに認証情報が送信されることはありません。\n\nパスワードを端末に保存する場合、iOS Keychain により暗号化して保護されます。TOTP シークレットキーも同様に Keychain に保存されます。\n\nなお、パスワードと TOTP シークレットキーを同一端末に保存した場合、厳密には2要素が1つの端末に集約されます。セキュリティを最重視する場合は、別端末の認証アプリ（Google Authenticator 等）をご利用ください。\n\nこのアプリのソースコードは GitHub で公開しており、認証情報の取り扱いをどなたでもご確認いただけます。";
 "appInfoSection" = "アプリ情報";
 "version" = "バージョン";
 "sourceCode" = "ソースコード";
+
+/* TOTP */
+"totpSectionTitle" = "2段階認証 (TOTP)";
+"totpConfigured" = "設定済み";
+"totpDelete" = "削除";
+"totpSave" = "保存";
+"totpDescription" = "TOTP シークレットキーを設定すると、ログイン時に OTP コードが自動入力されます。";
+"totpPlaceholder" = "Base32 シークレットキー";
+"totpInvalidTitle" = "無効なシークレット";
+"totpInvalidMessage" = "有効な Base32 形式のシークレットキーを入力してください。";
 
 "logout" = "ログアウト";
 "logoutConfirm" = "ログアウトしますか？";

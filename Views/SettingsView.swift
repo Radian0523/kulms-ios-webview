@@ -8,6 +8,9 @@ struct SettingsView: View {
     @State private var notifyNewAssignment: Bool = NotificationService.loadNewAssignmentNotification()
     @State private var showAddOffset = false
     @State private var showLogoutConfirm = false
+    @State private var totpSecret = ""
+    @State private var hasTotpSecret = CredentialStore.loadTotpSecret() != nil
+    @State private var showTotpInvalidAlert = false
 
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -50,6 +53,48 @@ struct SettingsView: View {
                         }
                     }
 
+                }
+
+                // MARK: - TOTP
+                Section(String(localized: "totpSectionTitle")) {
+                    if hasTotpSecret {
+                        HStack {
+                            Label(String(localized: "totpConfigured"), systemImage: "checkmark.shield.fill")
+                                .foregroundStyle(.green)
+                            Spacer()
+                            Button(String(localized: "totpDelete"), role: .destructive) {
+                                CredentialStore.clearTotpSecret()
+                                hasTotpSecret = false
+                                totpSecret = ""
+                            }
+                            .font(.subheadline)
+                        }
+                    } else {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(String(localized: "totpDescription"))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            HStack {
+                                TextField(String(localized: "totpPlaceholder"), text: $totpSecret)
+                                    .textInputAutocapitalization(.characters)
+                                    .autocorrectionDisabled()
+                                    .font(.system(.body, design: .monospaced))
+                                Button(String(localized: "totpSave")) {
+                                    let cleaned = totpSecret
+                                        .replacingOccurrences(of: " ", with: "")
+                                        .replacingOccurrences(of: "-", with: "")
+                                    if TOTPGenerator.isValidBase32(cleaned) {
+                                        CredentialStore.saveTotpSecret(cleaned)
+                                        hasTotpSecret = true
+                                        totpSecret = ""
+                                    } else {
+                                        showTotpInvalidAlert = true
+                                    }
+                                }
+                                .disabled(totpSecret.trimmingCharacters(in: .whitespaces).isEmpty)
+                            }
+                        }
+                    }
                 }
 
                 // MARK: - Security
@@ -115,6 +160,11 @@ struct SettingsView: View {
                         NotificationService.saveNotificationOffsets(offsets)
                     }
                 }
+            }
+            .alert(String(localized: "totpInvalidTitle"), isPresented: $showTotpInvalidAlert) {
+                Button(String(localized: "close"), role: .cancel) {}
+            } message: {
+                Text(String(localized: "totpInvalidMessage"))
             }
             .alert(String(localized: "logoutConfirm"), isPresented: $showLogoutConfirm) {
                 Button(String(localized: "logout"), role: .destructive) {

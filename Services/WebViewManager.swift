@@ -33,6 +33,9 @@ class WebViewManager: NSObject {
     /// ポータル到達コールバック（WebView ログイン用自動遷移）。
     var onPortalReached: (() -> Void)?
 
+    /// WebView モードでの TOTP 自動入力済みフラグ（無限ループ防止）。
+    private var didInjectTotpInWebView = false
+
     private override init() {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .default()
@@ -72,8 +75,10 @@ class WebViewManager: NSObject {
 
     /// ECS-ID/パスワードを使って KULMS にログインする。
     func loginWithCredentials(username: String, password: String) async -> LoginResult {
-        await withCheckedContinuation { continuation in
+        didInjectTotpInWebView = false
+        return await withCheckedContinuation { continuation in
             var credentialsInjected = false
+            var totpInjected = false
             var hasResumed = false
 
             let resume: (LoginResult) -> Void = { [weak self] result in
@@ -102,12 +107,27 @@ class WebViewManager: NSObject {
                 }
 
                 // 2段階認証
-                let twoFactorPaths = ["/authselect.php", "/u2flogin.cgi",
-                                       "/otplogin.cgi", "/motplogin.cgi"]
-                if urlString.contains(self.iimcHost)
-                    && twoFactorPaths.contains(where: { urlString.contains($0) }) {
-                    resume(.otpRequired)
-                    return
+                if urlString.contains(self.iimcHost) {
+                    // TOTP 自動入力: /otplogin.cgi
+                    if urlString.contains("/otplogin.cgi") {
+                        if !totpInjected,
+                           let secret = CredentialStore.loadTotpSecret(),
+                           let code = TOTPGenerator.generate(secret: secret) {
+                            totpInjected = true
+                            Task { @MainActor in
+                                self.injectTotpCode(code)
+                            }
+                            return
+                        }
+                        resume(.otpRequired)
+                        return
+                    }
+
+                    let otherTwoFactorPaths = ["/authselect.php", "/u2flogin.cgi", "/motplogin.cgi"]
+                    if otherTwoFactorPaths.contains(where: { urlString.contains($0) }) {
+                        resume(.otpRequired)
+                        return
+                    }
                 }
 
                 // login.cgi (ID/パスワード入力画面)
@@ -124,7 +144,15 @@ class WebViewManager: NSObject {
                             guard !hasResumed else { return }
                             switch state {
                             case .otp:
-                                resume(.otpRequired)
+                                // TOTP シークレットがあればこのページで自動入力を試みる
+                                if !totpInjected,
+                                   let secret = CredentialStore.loadTotpSecret(),
+                                   let code = TOTPGenerator.generate(secret: secret) {
+                                    totpInjected = true
+                                    self.injectTotpCode(code)
+                                } else {
+                                    resume(.otpRequired)
+                                }
                             case .error(let msg):
                                 resume(.failed(msg))
                             case .unknown:
@@ -181,6 +209,35 @@ class WebViewManager: NSObject {
             })();
             """
         webView.evaluateJavaScript(js, completionHandler: nil)
+    }
+
+    /// OTP 入力画面に TOTP コードを注入して送信する。
+    /// DOM 未準備時は最大 retries 回リトライする。
+    private func injectTotpCode(_ code: String, retries: Int = 3) {
+        let js = """
+            (function() {
+                try {
+                    var p = document.getElementById('password_input');
+                    var f = document.getElementById('login');
+                    if (p && f) {
+                        p.value = '\(code)';
+                        p.dispatchEvent(new Event('input', {bubbles: true}));
+                        f.submit();
+                        return 'ok';
+                    }
+                    return 'not_ready';
+                } catch (e) { return 'error'; }
+            })();
+            """
+        webView.evaluateJavaScript(js) { [weak self] result, _ in
+            let status = result as? String ?? "error"
+            if status == "not_ready" && retries > 0 {
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 300_000_000)
+                    self?.injectTotpCode(code, retries: retries - 1)
+                }
+            }
+        }
     }
 
     private enum CgiState {
@@ -287,12 +344,30 @@ extension WebViewManager: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let url = webView.url else { return }
 
+        // credential login フロー中かどうかをリスナー実行「前」に記憶する。
+        // リスナー内で resume → removeAll が走ると isEmpty が変わるため。
+        let wasInLoginFlow = !navigationListeners.isEmpty
+
         // ナビゲーションリスナー通知（ログイン処理用）
         let listeners = navigationListeners
         for l in listeners { l(url) }
 
-        // ポータル到達自動検知（credential login 中以外）
-        if navigationListeners.isEmpty, let callback = onPortalReached {
+        // 以下は credential login フロー外（WebView モード）でのみ実行
+        guard !wasInLoginFlow else { return }
+
+        // TOTP 自動入力（1回のみ。無限ループ防止）
+        if !didInjectTotpInWebView,
+           url.host == iimcHost,
+           url.absoluteString.contains("/otplogin.cgi") {
+            if let secret = CredentialStore.loadTotpSecret(),
+               let code = TOTPGenerator.generate(secret: secret) {
+                didInjectTotpInWebView = true
+                injectTotpCode(code)
+            }
+        }
+
+        // ポータル到達自動検知
+        if let callback = onPortalReached {
             let urlString = url.absoluteString
             let isPortalPage = urlString.hasPrefix(baseURL + "/portal")
                 && !urlString.contains("/login")

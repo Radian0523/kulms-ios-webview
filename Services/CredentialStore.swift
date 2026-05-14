@@ -6,6 +6,7 @@ enum CredentialStore {
     private static let service = "com.radian0523.kulms-plus-for-ios.credentials"
     private static let usernameAccount = "kulms_username"
     private static let passwordAccount = "kulms_password"
+    private static let totpSecretAccount = "kulms_totp_secret"
 
     /// 認証情報を保存する。
     static func save(username: String, password: String) {
@@ -20,10 +21,28 @@ enum CredentialStore {
         return (u, p)
     }
 
-    /// 保存済み認証情報を削除する。
+    /// 保存済み認証情報（ID/パスワード）を削除する。
+    /// TOTP シークレットはログアウトしても保持する。
     static func clear() {
         deleteItem(account: usernameAccount)
         deleteItem(account: passwordAccount)
+    }
+
+    // MARK: - TOTP Secret
+
+    /// TOTP シークレットキーを保存する。
+    static func saveTotpSecret(_ secret: String) {
+        saveItem(account: totpSecretAccount, value: secret)
+    }
+
+    /// 保存済みの TOTP シークレットキーを返す。未保存時は nil。
+    static func loadTotpSecret() -> String? {
+        loadItem(account: totpSecretAccount)
+    }
+
+    /// TOTP シークレットキーを削除する。
+    static func clearTotpSecret() {
+        deleteItem(account: totpSecretAccount)
     }
 
     /// 認証情報が保存されているかを返す。

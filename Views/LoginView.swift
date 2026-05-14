@@ -7,13 +7,17 @@ import WebKit
 struct LoginView: View {
     @EnvironmentObject private var appState: AppState
     @State private var useWebView = false
+    @State private var didAutoLogin = false
 
     var body: some View {
         Group {
             if useWebView {
                 WebViewLoginPanel(onBack: { useWebView = false })
             } else {
-                CredentialLoginView(onRequireWebViewLogin: { useWebView = true })
+                CredentialLoginView(
+                    onRequireWebViewLogin: { useWebView = true },
+                    didAutoLogin: $didAutoLogin
+                )
             }
         }
         .onChange(of: appState.isLoggedIn) { _, newValue in
