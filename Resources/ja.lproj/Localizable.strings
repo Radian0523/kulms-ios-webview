@@ -64,6 +64,10 @@
 "totpPlaceholder" = "Base32 シークレットキー";
 "totpInvalidTitle" = "無効なシークレット";
 "totpInvalidMessage" = "有効な Base32 形式のシークレットキーを入力してください。";
+"totpScanQr" = "QRコードをスキャン";
+"totpScanGuide" = "2段階認証のQRコードをカメラに映してください";
+"totpCameraPermission" = "QRコードを読み取るにはカメラの使用を許可してください";
+"openSettings" = "設定を開く";
 
 "logout" = "ログアウト";
 "logoutConfirm" = "ログアウトしますか？";

@@ -154,7 +154,13 @@ class WebViewManager: NSObject {
                                     resume(.otpRequired)
                                 }
                             case .error(let msg):
-                                resume(.failed(msg))
+                                if totpInjected {
+                                    // TOTP 自動入力済みで login.cgi にエラーが返った場合、
+                                    // OTP 失敗の可能性が高い → WebView に委ねる
+                                    resume(.otpRequired)
+                                } else {
+                                    resume(.failed(msg))
+                                }
                             case .unknown:
                                 break // 次の navigation を待つ
                             }
@@ -252,10 +258,18 @@ class WebViewManager: NSObject {
                 try {
                     var otpSend = document.getElementById('otp_send_button');
                     var dusername = document.getElementById('dusername_area');
+                    var usernameInput = document.getElementById('username_input');
+                    var passwordInput = document.getElementById('password_input');
                     var commentEl = document.getElementById('comment');
                     var otpVisible = false;
                     if (otpSend && otpSend.style.display !== 'none') otpVisible = true;
                     if (dusername && dusername.children.length > 0) otpVisible = true;
+                    // username フィールドが非表示で password フィールドが存在 → OTP ページ
+                    if (passwordInput && (!usernameInput || usernameInput.offsetParent === null
+                        || usernameInput.type === 'hidden'
+                        || usernameInput.style.display === 'none')) {
+                        otpVisible = true;
+                    }
                     if (otpVisible) return JSON.stringify({type: 'otp'});
                     var msg = '';
                     if (commentEl) {

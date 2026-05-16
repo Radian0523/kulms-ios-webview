@@ -33,6 +33,22 @@ enum TOTPGenerator {
         return String(format: "%06d", otp)
     }
 
+    /// otpauth:// URI から secret パラメータを抽出する。
+    static func extractSecret(from otpauthURI: String) -> String? {
+        guard let components = URLComponents(string: otpauthURI),
+              components.scheme == "otpauth",
+              let queryItems = components.queryItems,
+              let secretItem = queryItems.first(where: { $0.name == "secret" }),
+              let secret = secretItem.value else {
+            return nil
+        }
+        let cleaned = secret.replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "-", with: "")
+            .uppercased()
+        guard isValidBase32(cleaned) else { return nil }
+        return cleaned
+    }
+
     /// Base32 バリデーション（保存前チェック用）。
     static func isValidBase32(_ input: String) -> Bool {
         let cleaned = input.replacingOccurrences(of: " ", with: "")

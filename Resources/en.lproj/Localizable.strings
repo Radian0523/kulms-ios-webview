@@ -64,6 +64,10 @@
 "totpPlaceholder" = "Base32 secret key";
 "totpInvalidTitle" = "Invalid Secret";
 "totpInvalidMessage" = "Please enter a valid Base32 secret key.";
+"totpScanQr" = "Scan QR Code";
+"totpScanGuide" = "Point the camera at the two-factor authentication QR code";
+"totpCameraPermission" = "Camera permission is required to scan QR codes";
+"openSettings" = "Open Settings";
 
 "logout" = "Log out";
 "logoutConfirm" = "Log out?";

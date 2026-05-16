@@ -11,6 +11,7 @@ struct SettingsView: View {
     @State private var totpSecret = ""
     @State private var hasTotpSecret = CredentialStore.loadTotpSecret() != nil
     @State private var showTotpInvalidAlert = false
+    @State private var showQRScanner = false
 
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -93,6 +94,12 @@ struct SettingsView: View {
                                 }
                                 .disabled(totpSecret.trimmingCharacters(in: .whitespaces).isEmpty)
                             }
+                            Button {
+                                showQRScanner = true
+                            } label: {
+                                Label(String(localized: "totpScanQr"), systemImage: "qrcode.viewfinder")
+                                    .font(.subheadline)
+                            }
                         }
                     }
                 }
@@ -165,6 +172,13 @@ struct SettingsView: View {
                 Button(String(localized: "close"), role: .cancel) {}
             } message: {
                 Text(String(localized: "totpInvalidMessage"))
+            }
+            .sheet(isPresented: $showQRScanner) {
+                QRCodeScannerView { secret in
+                    CredentialStore.saveTotpSecret(secret)
+                    hasTotpSecret = true
+                    totpSecret = ""
+                }
             }
             .alert(String(localized: "logoutConfirm"), isPresented: $showLogoutConfirm) {
                 Button(String(localized: "logout"), role: .destructive) {

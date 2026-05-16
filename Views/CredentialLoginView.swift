@@ -17,10 +17,15 @@ struct CredentialLoginView: View {
     @State private var totpSecret = ""
     @State private var hasTotpSecret = CredentialStore.loadTotpSecret() != nil
     @State private var showTotpInvalidAlert = false
+    @State private var showQRScanner = false
     @State private var showDemoLogin = false
     @State private var demoUsername = ""
     @State private var demoPassword = ""
     @State private var demoError = false
+    @State private var debugTotpCode: String?
+    @State private var debugTotpSecret: String?
+    @State private var totpSecondsRemaining = 0
+    @State private var totpTimer: Timer?
     @FocusState private var focusedField: Field?
 
     enum Field { case username, password }
@@ -177,8 +182,38 @@ struct CredentialLoginView: View {
                                 CredentialStore.clearTotpSecret()
                                 hasTotpSecret = false
                                 totpSecret = ""
+                                debugTotpCode = nil
                             }
                             .font(.subheadline)
+                        }
+                        if let code = debugTotpCode {
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack(spacing: 8) {
+                                    Text(code)
+                                        .font(.system(.title2, design: .monospaced))
+                                        .fontWeight(.semibold)
+                                    Text("(\(totpSecondsRemaining)s)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .monospacedDigit()
+                                }
+                                if let secret = debugTotpSecret {
+                                    Text("Secret: \(secret)")
+                                        .font(.system(.caption2, design: .monospaced))
+                                        .foregroundStyle(.secondary)
+                                        .textSelection(.enabled)
+                                }
+                            }
+                            .padding(8)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.tertiarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        Button {
+                            refreshDebugTotp()
+                        } label: {
+                            Label("現在のコードを表示", systemImage: "eye")
+                                .font(.subheadline)
                         }
                     } else {
                         Text(String(localized: "totpDescription"))
@@ -205,6 +240,12 @@ struct CredentialLoginView: View {
                                 }
                             }
                             .disabled(totpSecret.trimmingCharacters(in: .whitespaces).isEmpty)
+                        }
+                        Button {
+                            showQRScanner = true
+                        } label: {
+                            Label(String(localized: "totpScanQr"), systemImage: "qrcode.viewfinder")
+                                .font(.subheadline)
                         }
                     }
                 }
@@ -269,12 +310,41 @@ struct CredentialLoginView: View {
         } message: {
             Text(String(localized: "totpInvalidMessage"))
         }
+        .sheet(isPresented: $showQRScanner) {
+            QRCodeScannerView { secret in
+                CredentialStore.saveTotpSecret(secret)
+                hasTotpSecret = true
+                totpSecret = ""
+            }
+        }
     }
 
     private func submit() {
         guard !isSubmitting, !username.isEmpty, !password.isEmpty else { return }
         focusedField = nil
         Task { await performLogin(saveOnSuccess: savePassword) }
+    }
+
+    private func refreshDebugTotp() {
+        guard let secret = CredentialStore.loadTotpSecret() else { return }
+        debugTotpSecret = secret
+        debugTotpCode = TOTPGenerator.generate(secret: secret)
+        updateTotpCountdown()
+        totpTimer?.invalidate()
+        totpTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            Task { @MainActor in
+                updateTotpCountdown()
+                let newCode = TOTPGenerator.generate(secret: secret)
+                if newCode != debugTotpCode {
+                    debugTotpCode = newCode
+                }
+            }
+        }
+    }
+
+    private func updateTotpCountdown() {
+        let now = Date().timeIntervalSince1970
+        totpSecondsRemaining = 30 - Int(now.truncatingRemainder(dividingBy: 30))
     }
 
     private func tryAutoLogin() {
