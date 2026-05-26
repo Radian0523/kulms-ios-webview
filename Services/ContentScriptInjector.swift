@@ -50,7 +50,8 @@ enum ContentScriptInjector {
             "settings", "assignments", "submit-detect", "file-drop", "tree-view",
             "course-name", "course-click", "tool-visibility",
             "kulms-textbook-handler", "textbooks",
-            "sidebar-resize", "top-favbar"
+            "sidebar-resize", "top-favbar",
+            "grading-ta-page", "grading-ta"
         ]
         for name in scriptNames {
             if let js = loadBundleResource(name: name, ext: "js") {

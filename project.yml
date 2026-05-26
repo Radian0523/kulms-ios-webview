@@ -52,6 +52,10 @@ targets:
         buildPhase: resources
       - path: ../kulms-extension/src/top-favbar.js
         buildPhase: resources
+      - path: ../kulms-extension/src/grading-ta-page.js
+        buildPhase: resources
+      - path: ../kulms-extension/src/grading-ta.js
+        buildPhase: resources
       # 拡張機能の CSS
       - path: ../kulms-extension/styles.css
         buildPhase: resources
@@ -78,8 +82,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.radian0523.kulms-plus-for-ios
         PRODUCT_NAME: KULMS
         INFOPLIST_KEY_CFBundleDisplayName: "KULMS+"
-        MARKETING_VERSION: "2.9.0"
-        CURRENT_PROJECT_VERSION: "23"
+        MARKETING_VERSION: "2.10.0"
+        CURRENT_PROJECT_VERSION: "24"
         DEVELOPMENT_TEAM: ""
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
