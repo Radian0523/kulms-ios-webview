@@ -5,7 +5,7 @@
 - 02_textbooks.png        (1242 x 2688)  6.5インチ iPhone
 - ipad_01_assignment.png  (2048 x 2732)  iPad
 
-ソース画像: kulms-extension/docs/images/ の拡張機能スクリーンショット
+ソース画像: kulms-extension/docs/images/png/ の拡張機能スクリーンショット
 """
 
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
@@ -13,7 +13,7 @@ import numpy as np
 import os
 
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
-EXT_IMAGES = os.path.join(os.path.dirname(OUTPUT_DIR), "..", "kulms-extension", "docs", "images")
+EXT_IMAGES = os.path.join(os.path.dirname(OUTPUT_DIR), "..", "kulms-extension", "docs", "images", "png")
 
 FONT_BOLD = "/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc"
 FONT_REGULAR = "/System/Library/Fonts/ヒラギノ角ゴシック W4.ttc"
